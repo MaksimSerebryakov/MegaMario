@@ -1,0 +1,4 @@
+**/build
+**/.DS_Store
+bin/app
+build_and_run.sh
