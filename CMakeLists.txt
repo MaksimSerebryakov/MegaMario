@@ -7,7 +7,10 @@ set(SFML_DIR "/opt/homebrew/Cellar/sfml/3.0.2/lib/cmake/SFML")
 
 find_package(SFML 3 REQUIRED COMPONENTS Graphics Window System)
 
-add_executable(app src/main.cpp)
+add_executable(app src/main.cpp
+                   src/Entity.cpp
+                   src/Vec2.cpp
+)
 
 target_compile_features(app PRIVATE cxx_std_17)
 target_link_libraries(app PRIVATE SFML::Graphics)
