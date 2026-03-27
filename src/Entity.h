@@ -3,7 +3,7 @@
 #include <tuple>
 #include <string>
 
-#include "EntityManager.h"
+//#include "EntityManager.h"
 #include "Components.h"
 
 typedef std::tuple<
@@ -25,10 +25,9 @@ class Entity
     bool m_active = true;
     ComponentsTuple m_components;
 
-public:
-    // TODO: remove to private
     Entity(const std::string &tag, int id, bool active);
 
+public:
     bool isActive() const;
     const std::string &getTag() const;
     const size_t getId() const;

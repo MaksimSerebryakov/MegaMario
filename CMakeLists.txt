@@ -10,6 +10,7 @@ find_package(SFML 3 REQUIRED COMPONENTS Graphics Window System)
 add_executable(app src/main.cpp
                    src/Entity.cpp
                    src/Vec2.cpp
+                   src/EntityManager.cpp
 )
 
 target_compile_features(app PRIVATE cxx_std_17)
