@@ -1,0 +1,88 @@
+#include "Scene_Menu.h"
+#include "GameEngine.h"
+
+Scene_Menu::Scene_Menu(GameEngine *gameEngine)
+    : Scene(gameEngine),
+      m_menuText(m_font)
+{
+    init();
+}
+
+void Scene_Menu::init()
+{
+    // TODO: load all text from config
+    m_title = "MegaMario";
+
+    m_menuStrings.push_back("LEVEL 1");
+    m_menuStrings.push_back("LEVEL 2");
+    m_menuStrings.push_back("LEVEL 3");
+
+    m_hint = "UP:W  DOWN:S  PLAY:D  EXIT:ESC";
+
+    m_menuText.setFont(m_gameEngine->assets().getFont("8bit"));
+    m_menuText.setCharacterSize(48);
+    m_menuText.setFillColor(sf::Color::Black);
+}
+
+void Scene_Menu::update()
+{
+    m_currentFrame++;
+
+    if ((m_currentFrame % 6) == 0) {
+        sRender();
+    }
+}
+
+void Scene_Menu::onEnd()
+{
+}
+
+void Scene_Menu::sDoAction(const Action &action)
+{
+}
+
+void Scene_Menu::drawText(const std::string &str, sf::Vector2f pos,
+                          const sf::Color &color)
+{
+    m_menuText.setString(str);
+    m_menuText.setPosition(pos);
+    m_menuText.setFillColor(color);
+
+    m_gameEngine->window().draw(m_menuText);
+}
+
+void Scene_Menu::sRender()
+{
+    m_gameEngine->window().clear(sf::Color(194, 187, 235));
+
+    m_menuText.setCharacterSize(48);
+    drawText(m_title, sf::Vector2f(10, 10));
+
+    for (int i = 0; i < m_menuStrings.size(); i++)
+    {
+        if (i == m_selectedLevelIndex)
+        {
+            drawText(m_menuStrings[i], sf::Vector2f(10, 100 + i * 50),
+                     sf::Color::White);
+        }
+        else
+        {
+            drawText(m_menuStrings[i], sf::Vector2f(10, 100 + i * 50));
+        }
+    }
+
+    int hintPosY = m_gameEngine->window().getSize().y - 48;
+
+    m_menuText.setCharacterSize(24);
+    drawText(m_hint, sf::Vector2f(10, hintPosY));
+
+    m_gameEngine->window().display();
+}
+
+void Scene_Menu::doAction(const Action &action)
+{
+}
+
+Scene_Menu::~Scene_Menu()
+{
+}
