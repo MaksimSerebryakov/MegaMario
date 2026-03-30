@@ -1,13 +1,15 @@
 #pragma once
 
 #include <memory>
+#include <SFML/Graphics.hpp>
+#include <SFML/Window.hpp>
 
 #include "Action.h"
 #include "EntityManager.h"
 
 class GameEngine;
 
-typedef std::map<int, std::string> ActionMap;
+typedef std::map<sf::Keyboard::Scancode, std::string> ActionMap;
 
 class Scene
 {
@@ -34,7 +36,7 @@ public:
 
     void simulate(const size_t frames);
 
-    void registerAction(int inputKey, const std::string &actionName);
+    void registerAction(sf::Keyboard::Scancode inputKey, const std::string &actionName);
 
     size_t width() const;
     size_t height() const;

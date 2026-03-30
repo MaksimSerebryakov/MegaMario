@@ -11,7 +11,7 @@ void Scene::setPaused(bool paused)
     m_paused = paused;
 }
 
-void Scene::registerAction(int inputKey, const std::string &actionName)
+void Scene::registerAction(sf::Keyboard::Scancode inputKey, const std::string &actionName)
 {
     m_actions[inputKey] = actionName;
 }

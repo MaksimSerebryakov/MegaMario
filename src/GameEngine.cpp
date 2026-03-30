@@ -39,6 +39,19 @@ void GameEngine::sUserInput()
         {
             quit();
         }
+
+        if (event->is<sf::Event::KeyPressed>())
+        {
+            const auto *keyPressed = event->getIf<sf::Event::KeyPressed>();
+
+            if (currentScene()->getActionMap().find(keyPressed->scancode) ==
+                currentScene()->getActionMap().end())
+            {
+                continue;
+            }
+
+            currentScene()->doAction(Action(currentScene()->getActionMap().at(keyPressed->scancode), "START"));
+        }
     }
 }
 

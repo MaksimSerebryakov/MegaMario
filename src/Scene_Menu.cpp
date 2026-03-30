@@ -10,6 +10,11 @@ Scene_Menu::Scene_Menu(GameEngine *gameEngine)
 
 void Scene_Menu::init()
 {
+    registerAction(sf::Keyboard::Scancode::W, "UP");
+    registerAction(sf::Keyboard::Scancode::S, "DOWN");
+    registerAction(sf::Keyboard::Scancode::D, "PLAY");
+    registerAction(sf::Keyboard::Scancode::Escape, "QUIT");
+
     // TODO: load all text from config
     m_title = "MegaMario";
 
@@ -35,10 +40,22 @@ void Scene_Menu::update()
 
 void Scene_Menu::onEnd()
 {
+    m_gameEngine->quit();
 }
 
 void Scene_Menu::sDoAction(const Action &action)
 {
+    if (action.type() == ACTION_TYPE_START) {
+        if(action.name() == "DOWN") {
+            ++m_selectedLevelIndex %= 3;
+        }
+        if(action.name() == "UP") {
+            m_selectedLevelIndex = (m_selectedLevelIndex + 2) % 3;
+        }
+        if(action.name() == "QUIT") {
+            onEnd();
+        }
+    }
 }
 
 void Scene_Menu::drawText(const std::string &str, sf::Vector2f pos,
@@ -81,6 +98,7 @@ void Scene_Menu::sRender()
 
 void Scene_Menu::doAction(const Action &action)
 {
+    sDoAction(action);
 }
 
 Scene_Menu::~Scene_Menu()
