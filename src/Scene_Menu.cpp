@@ -34,10 +34,7 @@ void Scene_Menu::update()
 {
     m_currentFrame++;
     sRender();
-    // if ((m_currentFrame % 15) == 0)
-    // {
-    //     
-    // }
+    
 }
 
 void Scene_Menu::onEnd()
@@ -47,6 +44,7 @@ void Scene_Menu::onEnd()
 
 void Scene_Menu::sDoAction(const Action &action)
 {
+    // Since we have only 2 Action types now, we can use if/else, not if(action_start), if(action_end)
     if (action.type() == ACTION_TYPE_START)
     {
         if (action.name() == "DOWN")

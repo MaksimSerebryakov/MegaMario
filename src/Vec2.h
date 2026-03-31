@@ -5,6 +5,7 @@ class Vec2
 public:
     float x = 0, y = 0, vecLength = 0;
 
+    Vec2() {}
     Vec2(float other_x, float other_y);
     Vec2(const Vec2 &other);
 

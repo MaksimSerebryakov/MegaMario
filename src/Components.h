@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Vec2.h"
+#include "Animation.h"
 
 class Component
 {
@@ -26,24 +27,51 @@ public:
 
 class CBoundingBox : public Component
 {
+public:
+    Vec2 size = {0.0, 0.0};
+    Vec2 halfSize = {0.0, 0.0};
+
+    CBoundingBox() {}
+    CBoundingBox(const Vec2 &otherSize)
+        : size{otherSize},
+          halfSize{otherSize.x / 2, otherSize.y / 2} {}
 };
 
 class CLifeSpan : public Component
 {
+public:
+    CLifeSpan() {}
 };
 
 class CInput : public Component
 {
+public:
+    bool up = false;
+    bool down = false;
+    bool left = false;
+    bool right = false;
+
+    CInput() {}
 };
 
 class CAnimation : public Component
 {
+public:
+    Animation animation;
+    CAnimation() {}
 };
 
 class CGravity : public Component
 {
+public:
+    float gravity = 0.0;
+
+    CGravity() {}
+    CGravity(float g) : gravity{g} {}
 };
 
 class CState : public Component
 {
+public:
+    CState() {}
 };

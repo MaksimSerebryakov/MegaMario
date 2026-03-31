@@ -6,6 +6,11 @@ std::shared_ptr<Entity> EntityManager::addEntity(const std::string &tag)
 
     m_entitiesToAdd.push_back(entity);
 
+    if (tag == PLAYER_TAG)
+    {
+        entity->addComponent<CInput>();
+    }
+
     return entity;
 }
 

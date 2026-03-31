@@ -7,6 +7,9 @@
 
 #include "Entity.h"
 
+#define PLAYER_TAG "player"
+#define TILE_TAG "tile"
+
 typedef std::vector<std::shared_ptr<Entity>> EntityVector;
 typedef std::map<std::string, EntityVector> EntityMap;
 

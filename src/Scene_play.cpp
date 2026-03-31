@@ -14,6 +14,11 @@ void Scene_Play::init(const std::string &levelPath)
 {
     registerAction(sf::Keyboard::Scancode::Escape, ACTION_QUIT);
     registerAction(sf::Keyboard::Scancode::G, ACTION_TOGGLE_GRID);
+    registerAction(sf::Keyboard::Scancode::T, ACTION_TOGGLE_TEXTURES);
+    registerAction(sf::Keyboard::Scancode::C, ACTION_TOGGLE_COLLISIONS);
+    registerAction(sf::Keyboard::Scancode::W, ACTION_UP);
+    registerAction(sf::Keyboard::Scancode::D, ACTION_RIGHT);
+    registerAction(sf::Keyboard::Scancode::A, ACTION_LEFT);
 
     m_gridText.setFont(m_gameEngine->assets().getFont("Lato"));
     m_gridText.setCharacterSize(12);
@@ -23,20 +28,68 @@ void Scene_Play::init(const std::string &levelPath)
 
 void Scene_Play::loadLevel(const std::string &filename)
 {
-}
+    // TODO : remove, add from config!!
+    m_playerConfig.MAXSPEED = 64;
 
+    for (int i = 0; i < 10; i++)
+    {
+        auto e = m_entities.addEntity(TILE_TAG);
+
+        e->addComponent<CBoundingBox>(Vec2(64, 64));
+        e->addComponent<CTransform>(gridToMidPixel(i, 0, e));
+    }
+
+    spawnPlayer();
+}
 
 // Systems
 void Scene_Play::sDoAction(const Action &action)
 {
+    // Since we have only 2 Action types now, we can use if/else, not if(action_start), if(action_end)
     if (action.type() == ACTION_TYPE_START)
     {
         if (action.name() == ACTION_QUIT)
         {
             onEnd();
         }
-        if (action.name() == ACTION_TOGGLE_GRID) {
+        if (action.name() == ACTION_TOGGLE_GRID)
+        {
             m_drawGrid = !m_drawGrid;
+        }
+        if (action.name() == ACTION_TOGGLE_COLLISIONS)
+        {
+            m_drawCollisions = !m_drawCollisions;
+        }
+        if (action.name() == ACTION_TOGGLE_TEXTURES)
+        {
+            m_drawTextures = !m_drawTextures;
+        }
+        if (action.name() == ACTION_UP)
+        {
+            m_player->getComponent<CInput>().up = true;
+        }
+        if (action.name() == ACTION_LEFT)
+        {
+            m_player->getComponent<CInput>().left = true;
+        }
+        if (action.name() == ACTION_RIGHT)
+        {
+            m_player->getComponent<CInput>().right = true;
+        }
+    }
+    else
+    {
+        if (action.name() == ACTION_UP)
+        {
+            m_player->getComponent<CInput>().up = false;
+        }
+        if (action.name() == ACTION_LEFT)
+        {
+            m_player->getComponent<CInput>().left = false;
+        }
+        if (action.name() == ACTION_RIGHT)
+        {
+            m_player->getComponent<CInput>().right = false;
         }
     }
 }
@@ -45,12 +98,48 @@ void Scene_Play::sRender()
 {
     m_gameEngine->window().clear(sf::Color(27, 191, 250));
 
+    if (m_drawCollisions)
+    {
+        drawCollisionBoxes();
+    }
+
     if (m_drawGrid)
     {
         drawGrid();
     }
 
     m_gameEngine->window().display();
+}
+
+void Scene_Play::sMovement()
+{
+    Vec2 pVel(0, m_player->getComponent<CTransform>().velocity.y);
+
+    if (m_player->getComponent<CInput>().left)
+    {
+        pVel.x = -2.0;
+    }
+    if (m_player->getComponent<CInput>().right)
+    {
+        pVel.x = 2.0;
+    }
+
+    m_player->getComponent<CTransform>().velocity = pVel;
+
+    for (auto e : m_entities.getEntities())
+    {
+        if (e->hasComponent<CGravity>())
+        {
+            e->getComponent<CTransform>().velocity.y += e->getComponent<CGravity>().gravity;
+
+            if (e->getComponent<CTransform>().velocity.y > m_playerConfig.MAXSPEED)
+            {
+                e->getComponent<CTransform>().velocity.y = m_playerConfig.MAXSPEED;
+            }
+        }
+
+        e->getComponent<CTransform>().pos += e->getComponent<CTransform>().velocity;
+    }
 }
 
 // Systems above
@@ -62,9 +151,54 @@ void Scene_Play::doAction(const Action &action)
 
 void Scene_Play::update()
 {
-    m_currentFrame++;
+    m_entities.update();
 
+    if (m_player == nullptr)
+    {
+        spawnPlayer();
+    }
+
+    sMovement();
     sRender();
+
+    m_currentFrame++;
+}
+
+Vec2 Scene_Play::gridToMidPixel(float gridX, float gridY, std::shared_ptr<Entity> entity)
+{
+    // TODO: uncomment when animation is added
+    // float x = entity->getComponent<CAnimation>().animation.getSize().x;
+    // float y = entity->getComponent<CAnimation>().animation.getSize().y;
+
+    float x = entity->getComponent<CBoundingBox>().size.x;
+    float y = entity->getComponent<CBoundingBox>().size.y;
+
+    x = gridX * m_gridSize.x + x / 2;
+    y = height() - gridY * m_gridSize.y - y / 2;
+
+    return Vec2(x, y);
+}
+
+void Scene_Play::drawCollisionBoxes()
+{
+    for (auto e : m_entities.getEntities())
+    {
+        if (e->hasComponent<CBoundingBox>())
+        {
+            auto box = e->getComponent<CBoundingBox>();
+            auto position = e->getComponent<CTransform>();
+            sf::RectangleShape rect;
+
+            rect.setPosition({position.pos.x, position.pos.y});
+            rect.setSize({box.size.x - 1, box.size.y - 1});
+            rect.setOrigin({box.halfSize.x, box.halfSize.y});
+            rect.setFillColor(sf::Color(0, 0, 0, 0));
+            rect.setOutlineColor(sf::Color(255, 255, 255));
+            rect.setOutlineThickness(1);
+
+            m_gameEngine->window().draw(rect);
+        }
+    }
 }
 
 void Scene_Play::drawGrid()
@@ -102,9 +236,23 @@ void Scene_Play::drawGrid()
     }
 }
 
+void Scene_Play::spawnPlayer()
+{
+    // TODO: add reading from config
+    auto player = m_entities.addEntity(PLAYER_TAG);
+
+    player->addComponent<CBoundingBox>(Vec2(48, 48));
+    player->addComponent<CTransform>(gridToMidPixel(4, 6, player));
+    // player->addComponent<CGravity>(0.1);
+
+    m_player = player;
+}
+
 void Scene_Play::onEnd()
 {
     m_gameEngine->changeScene(SCENE_MENU, std::make_shared<Scene_Menu>(m_gameEngine));
+    m_player->destroy();
+    m_player = nullptr;
 }
 
 Scene_Play::~Scene_Play() {}

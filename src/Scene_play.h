@@ -5,6 +5,11 @@
 
 #define ACTION_QUIT "QUIT"
 #define ACTION_TOGGLE_GRID "TOGGLE_GRID"
+#define ACTION_TOGGLE_TEXTURES "TOGGLE_TEXTURES"
+#define ACTION_TOGGLE_COLLISIONS "TOGGLE_COLLISIONS"
+#define ACTION_UP "UP"
+#define ACTION_LEFT "LEFT"
+#define ACTION_RIGHT "RIGHT"
 
 class GameEngine;
 
@@ -21,7 +26,7 @@ protected:
     std::shared_ptr<Entity> m_player;
     PlayerConfig m_playerConfig;
     bool m_drawTextures = true;    // Show entities Textures
-    bool m_drawCollisions = false; // Debug: show collision boxes
+    bool m_drawCollisions = true; // Debug: show collision bounding boxes
     bool m_drawGrid = false;       // Debug: show grid
     const Vec2 m_gridSize = {64, 64};
     // dummy font as sf::Text doesn't have default constructor
@@ -42,13 +47,18 @@ protected:
 
     void loadLevel(const std::string &filename); // load entities from level config file
 
-    void drawGrid(); // Draw a grid inside level scene
+    void drawGrid();           // Draw a grid inside level scene
+    void drawCollisionBoxes(); // Draw entities Collision boxes
+
+    void spawnPlayer();
 
 public:
     Scene_Play(const std::string levelPath, GameEngine *gameEngine = nullptr);
 
     void sRender();                      // System: render system
     void doAction(const Action &action); // Outer do action func, for game engine user input
+
+    Vec2 gridToMidPixel(float gridX, float gridY, std::shared_ptr<Entity> entity);
 
     ~Scene_Play();
 };

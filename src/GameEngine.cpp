@@ -50,7 +50,21 @@ void GameEngine::sUserInput()
                 continue;
             }
 
-            currentScene()->doAction(Action(currentScene()->getActionMap().at(keyPressed->scancode), "START"));
+            currentScene()->doAction(
+                Action(currentScene()->getActionMap().at(keyPressed->scancode), ACTION_TYPE_START));
+        }
+        if (event->is<sf::Event::KeyReleased>())
+        {
+            const auto *keyReleased = event->getIf<sf::Event::KeyReleased>();
+
+            if (currentScene()->getActionMap().find(keyReleased->scancode) ==
+                currentScene()->getActionMap().end())
+            {
+                continue;
+            }
+
+            currentScene()->doAction(
+                Action(currentScene()->getActionMap().at(keyReleased->scancode), ACTION_TYPE_END));
         }
     }
 }
