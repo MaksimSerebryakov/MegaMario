@@ -1,0 +1,6 @@
+# MegaMario
+
+**MegaMario** is a simple game, written with SFML(c++17).  
+ 
+This is a result of Assignment 3 from **David Churchill's**(https://davechurchill.ca/) "COMP4300 Intro to Game Programming" course.  
+**YouTube:** https://www.youtube.com/watch?v=S5CXXWbaDlc&list=PL_xRyXins848nDj2v-TJYahzvs-XW9sVV
