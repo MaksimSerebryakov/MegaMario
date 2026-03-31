@@ -13,7 +13,7 @@ void GameEngine::init(const std::string &path)
     m_window.create(sf::VideoMode({1280, 768}), "Mega Mario");
     m_window.setFramerateLimit(60);
 
-    changeScene("menu", std::make_shared<Scene_Menu>(this));
+    changeScene(SCENE_MENU, std::make_shared<Scene_Menu>(this));
 }
 
 void GameEngine::run()
@@ -62,6 +62,12 @@ void GameEngine::changeScene(const std::string &sceneName, std::shared_ptr<Scene
     {
         m_scenes[sceneName] = scene;
     }
+
+    // Return window center to starting point TODO: mb need to solve that other way
+    sf::View view = m_window.getView();
+    view.setCenter({m_window.getSize().x / (float)2.0,
+                    view.getCenter().y});
+    m_window.setView(view);
 
     m_currentScene = sceneName;
 }

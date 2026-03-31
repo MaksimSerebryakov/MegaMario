@@ -15,6 +15,7 @@ add_executable(app src/main.cpp
                    src/Assets.cpp
                    src/Scene.cpp
                    src/Scene_Menu.cpp
+                   src/Scene_Play.cpp
 )
 
 target_compile_features(app PRIVATE cxx_std_17)

@@ -7,6 +7,9 @@
 #include "Action.h"
 #include "EntityManager.h"
 
+#define SCENE_MENU "menu"
+#define SCENE_PLAY "play"
+
 class GameEngine;
 
 typedef std::map<sf::Keyboard::Scancode, std::string> ActionMap;

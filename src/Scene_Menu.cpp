@@ -1,4 +1,5 @@
 #include "Scene_Menu.h"
+#include "Scene_play.h"
 #include "GameEngine.h"
 
 Scene_Menu::Scene_Menu(GameEngine *gameEngine)
@@ -32,10 +33,11 @@ void Scene_Menu::init()
 void Scene_Menu::update()
 {
     m_currentFrame++;
-
-    if ((m_currentFrame % 6) == 0) {
-        sRender();
-    }
+    sRender();
+    // if ((m_currentFrame % 15) == 0)
+    // {
+    //     
+    // }
 }
 
 void Scene_Menu::onEnd()
@@ -45,15 +47,24 @@ void Scene_Menu::onEnd()
 
 void Scene_Menu::sDoAction(const Action &action)
 {
-    if (action.type() == ACTION_TYPE_START) {
-        if(action.name() == "DOWN") {
+    if (action.type() == ACTION_TYPE_START)
+    {
+        if (action.name() == "DOWN")
+        {
             ++m_selectedLevelIndex %= 3;
         }
-        if(action.name() == "UP") {
+        if (action.name() == "UP")
+        {
             m_selectedLevelIndex = (m_selectedLevelIndex + 2) % 3;
         }
-        if(action.name() == "QUIT") {
+        if (action.name() == "QUIT")
+        {
             onEnd();
+        }
+        if (action.name() == "PLAY")
+        {
+            m_gameEngine->changeScene(SCENE_PLAY,
+                                      std::make_shared<Scene_Play>("text.txt", m_gameEngine));
         }
     }
 }
