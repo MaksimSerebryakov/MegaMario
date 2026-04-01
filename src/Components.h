@@ -3,6 +3,12 @@
 #include "Vec2.h"
 #include "Animation.h"
 
+#define STATE_JUMPING "jumping"
+#define STATE_STANDING "standing"
+#define STATE_RUNNING "running"
+#define STATE_ON_GROUND "on_ground"
+#define STATE_AIR "air"
+
 class Component
 {
 public:
@@ -50,6 +56,9 @@ public:
     bool down = false;
     bool left = false;
     bool right = false;
+    bool shoot = false;
+    bool canShoot = true;
+    bool canJump = true;
 
     CInput() {}
 };
@@ -58,7 +67,12 @@ class CAnimation : public Component
 {
 public:
     Animation animation;
+    bool repeat = false;
+
     CAnimation() {}
+    CAnimation(const Animation &a, bool r)
+        : animation{a},
+          repeat{r} {}
 };
 
 class CGravity : public Component
@@ -73,5 +87,8 @@ public:
 class CState : public Component
 {
 public:
+    std::string state = STATE_AIR;
+
     CState() {}
+    CState(const std::string &s) : state{s} {}
 };

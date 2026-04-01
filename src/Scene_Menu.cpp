@@ -34,7 +34,6 @@ void Scene_Menu::update()
 {
     m_currentFrame++;
     sRender();
-    
 }
 
 void Scene_Menu::onEnd()
@@ -86,15 +85,9 @@ void Scene_Menu::sRender()
 
     for (int i = 0; i < m_menuStrings.size(); i++)
     {
-        if (i == m_selectedLevelIndex)
-        {
-            drawText(m_menuStrings[i], sf::Vector2f(10, 100 + i * 50),
-                     sf::Color::White);
-        }
-        else
-        {
-            drawText(m_menuStrings[i], sf::Vector2f(10, 100 + i * 50));
-        }
+        sf::Color lineColor = i == m_selectedLevelIndex ? sf::Color::White : sf::Color::Black;
+
+        drawText(m_menuStrings[i], sf::Vector2f(10, 100 + i * 50), lineColor);
     }
 
     int hintPosY = m_gameEngine->window().getSize().y - 48;
