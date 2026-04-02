@@ -33,6 +33,7 @@ protected:
     // dummy font as sf::Text doesn't have default constructor
     sf::Font m_font;
     sf::Text m_gridText;
+    bool m_onTheWall = false;
 
     void init(const std::string &levelPath);
 

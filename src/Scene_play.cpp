@@ -51,7 +51,13 @@ void Scene_Play::loadLevel(const std::string &filename)
     brick->addComponent<CTransform>(gridToMidPixel(4, 2, brick));
     brick = m_entities.addEntity(TILE_TAG);
     brick->addComponent<CBoundingBox>(Vec2(64, 64));
-    brick->addComponent<CTransform>(gridToMidPixel(3, 4, brick));
+    brick->addComponent<CTransform>(gridToMidPixel(3, 5, brick));
+    brick = m_entities.addEntity(TILE_TAG);
+    brick->addComponent<CBoundingBox>(Vec2(64, 64));
+    brick->addComponent<CTransform>(gridToMidPixel(4, 5, brick));
+    brick = m_entities.addEntity(TILE_TAG);
+    brick->addComponent<CBoundingBox>(Vec2(64, 64));
+    brick->addComponent<CTransform>(gridToMidPixel(5, 5, brick));
 
     for (int i = 0; i < 10; i++)
     {
@@ -144,7 +150,7 @@ void Scene_Play::sMovement()
 {
     Vec2 pVel(0, m_player->getComponent<CTransform>().velocity.y);
 
-    std::cout << m_player->getComponent<CState>().state << std::endl;
+    //std::cout << m_player->getComponent<CState>().state << std::endl;
 
     if (m_player->getComponent<CInput>().left)
     {
@@ -171,6 +177,10 @@ void Scene_Play::sMovement()
     if (m_player->getComponent<CState>().state == STATE_ON_GROUND)
     {
         pVel.y = 0;
+    }
+    if (m_onTheWall && (m_player->getComponent<CState>().state != STATE_ON_GROUND))
+    {
+        pVel.x = 0;
     }
     m_player->getComponent<CTransform>().velocity = pVel;
 
@@ -199,6 +209,7 @@ void Scene_Play::sCollision()
     m_player->getComponent<CState>().state = STATE_AIR;
 
     bool stillOnTheGround = false;
+    m_onTheWall = false;
 
     for (auto e : m_entities.getEntities(TILE_TAG))
     {
@@ -263,6 +274,14 @@ void Scene_Play::sCollision()
                 (m_player->getComponent<CTransform>().pos.y < e->getComponent<CTransform>().pos.y))
             {
                 stillOnTheGround = true;
+            }
+        }
+        if ((overlap.x == 0) && (overlap.y > 0))
+        {
+            if (prevOverlap.x >= 0) //&&
+                                    //(m_player->getComponent<CTransform>().pos.x < e->getComponent<CTransform>().pos.y))
+            {
+                m_onTheWall = true;
             }
         }
     }
