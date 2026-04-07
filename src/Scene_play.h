@@ -12,6 +12,9 @@
 #define ACTION_LEFT "LEFT"
 #define ACTION_RIGHT "RIGHT"
 
+#define PLAYER_X_SPEED 3.0
+#define PLAYER_JUMP_SPEED 7.0
+
 class GameEngine;
 
 class Scene_Play : public Scene
@@ -26,14 +29,16 @@ protected:
     std::string m_levelPath;
     std::shared_ptr<Entity> m_player;
     PlayerConfig m_playerConfig;
-    bool m_drawTextures = true;    // Show entities Textures
+    bool m_drawTextures = true;   // Show entities Textures
     bool m_drawCollisions = true; // Debug: show collision bounding boxes
-    bool m_drawGrid = false;       // Debug: show grid
+    bool m_drawGrid = false;      // Debug: show grid
     const Vec2 m_gridSize = {64, 64};
     // dummy font as sf::Text doesn't have default constructor
     sf::Font m_font;
     sf::Text m_gridText;
     bool m_onTheWall = false;
+    bool m_onTheRightWall = false;
+    bool m_onTheLeftWall = false;
 
     void init(const std::string &levelPath);
 
@@ -51,6 +56,7 @@ protected:
 
     void drawGrid();           // Draw a grid inside level scene
     void drawCollisionBoxes(); // Draw entities Collision boxes
+    void drawTextures();       // Draw textures
 
     void spawnPlayer();
 

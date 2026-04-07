@@ -17,9 +17,17 @@ Animation::Animation(
       m_size{size},
       m_name{name}
 {
+    m_sprite = sprite;
+
+    m_sprite.setOrigin({size.x / 2, size.y / 2});
 }
 
 const Vec2 &Animation::getSize() const
 {
     return m_size;
+}
+
+sf::Sprite &Animation::getSprite()
+{
+    return m_sprite;
 }

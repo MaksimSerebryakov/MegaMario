@@ -39,32 +39,61 @@ void Scene_Play::loadLevel(const std::string &filename)
     auto brick = m_entities.addEntity(TILE_TAG);
     brick->addComponent<CBoundingBox>(Vec2(64, 64));
     brick->addComponent<CTransform>(gridToMidPixel(6, 6, brick));
+    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation("brick"), false);
 
     brick = m_entities.addEntity(TILE_TAG);
     brick->addComponent<CBoundingBox>(Vec2(64, 64));
     brick->addComponent<CTransform>(gridToMidPixel(1, 1, brick));
-    brick = m_entities.addEntity(TILE_TAG);
-    brick->addComponent<CBoundingBox>(Vec2(64, 64));
-    brick->addComponent<CTransform>(gridToMidPixel(4, 1, brick));
+    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation("brick"), false);
+
     brick = m_entities.addEntity(TILE_TAG);
     brick->addComponent<CBoundingBox>(Vec2(64, 64));
     brick->addComponent<CTransform>(gridToMidPixel(4, 2, brick));
+    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation("brick"), false);
     brick = m_entities.addEntity(TILE_TAG);
     brick->addComponent<CBoundingBox>(Vec2(64, 64));
-    brick->addComponent<CTransform>(gridToMidPixel(3, 5, brick));
-    brick = m_entities.addEntity(TILE_TAG);
-    brick->addComponent<CBoundingBox>(Vec2(64, 64));
-    brick->addComponent<CTransform>(gridToMidPixel(4, 5, brick));
-    brick = m_entities.addEntity(TILE_TAG);
-    brick->addComponent<CBoundingBox>(Vec2(64, 64));
-    brick->addComponent<CTransform>(gridToMidPixel(5, 5, brick));
+    brick->addComponent<CTransform>(gridToMidPixel(4, 3, brick));
+    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation("brick"), false);
 
-    for (int i = 0; i < 10; i++)
+    brick = m_entities.addEntity(TILE_TAG);
+    brick->addComponent<CBoundingBox>(Vec2(64, 64));
+    brick->addComponent<CTransform>(gridToMidPixel(7, 2, brick));
+    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation("brick"), false);
+    brick = m_entities.addEntity(TILE_TAG);
+    brick->addComponent<CBoundingBox>(Vec2(64, 64));
+    brick->addComponent<CTransform>(gridToMidPixel(7, 3, brick));
+    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation("brick"), false);
+
+    // brick = m_entities.addEntity(TILE_TAG);
+    // brick->addComponent<CBoundingBox>(Vec2(64, 64));
+    // brick->addComponent<CTransform>(gridToMidPixel(3, 4, brick));
+    // brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation("brick"), false);
+
+    brick = m_entities.addEntity(TILE_TAG);
+    brick->addComponent<CBoundingBox>(Vec2(64, 64));
+    brick->addComponent<CTransform>(gridToMidPixel(4, 6, brick));
+    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation("brick"), false);
+
+    brick = m_entities.addEntity(TILE_TAG);
+    brick->addComponent<CBoundingBox>(Vec2(64, 64));
+    brick->addComponent<CTransform>(gridToMidPixel(5, 6, brick));
+    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation("brick"), false);
+
+    auto tube = m_entities.addEntity(TILE_TAG);
+    tube->addComponent<CBoundingBox>(Vec2(128, 256));
+    tube->addComponent<CTransform>(gridToMidPixel(8, 0, tube));
+    tube->addComponent<CAnimation>(m_gameEngine->assets().getAnimation("greenTube"), false);
+
+    for (int i = 0; i < 20; i++)
     {
-        auto e = m_entities.addEntity(TILE_TAG);
+        if ((i != 10) && (i != 15))
+        {
+            auto e = m_entities.addEntity(TILE_TAG);
 
-        e->addComponent<CBoundingBox>(Vec2(64, 64));
-        e->addComponent<CTransform>(gridToMidPixel(i, 0, e));
+            e->addComponent<CBoundingBox>(Vec2(64, 64));
+            e->addComponent<CTransform>(gridToMidPixel(i, 0, e));
+            e->addComponent<CAnimation>(m_gameEngine->assets().getAnimation("ground"), false);
+        }
     }
 }
 
@@ -90,8 +119,8 @@ void Scene_Play::sDoAction(const Action &action)
         {
             m_drawTextures = !m_drawTextures;
         }
-        if ((action.name() == ACTION_UP) &&
-            (m_player->getComponent<CState>().state != STATE_AIR))
+        if (action.name() == ACTION_UP) //&&
+                                        //(m_player->getComponent<CState>().state != STATE_AIR))
         {
             m_player->getComponent<CInput>().up = true;
         }
@@ -133,6 +162,15 @@ void Scene_Play::sRender()
 {
     m_gameEngine->window().clear(sf::Color(27, 191, 250));
 
+    auto view = m_gameEngine->window().getView();
+    float viewCenterX = std::max(view.getCenter().x, m_player->getComponent<CTransform>().pos.x);
+    view.setCenter({viewCenterX, view.getCenter().y});
+    m_gameEngine->window().setView(view);
+
+    if (m_drawTextures)
+    {
+        drawTextures();
+    }
     if (m_drawCollisions)
     {
         drawCollisionBoxes();
@@ -150,20 +188,20 @@ void Scene_Play::sMovement()
 {
     Vec2 pVel(0, m_player->getComponent<CTransform>().velocity.y);
 
-    //std::cout << m_player->getComponent<CState>().state << std::endl;
+    // std::cout << m_player->getComponent<CState>().state << std::endl;
 
-    if (m_player->getComponent<CInput>().left)
+    if (m_player->getComponent<CInput>().left && (!m_onTheRightWall))
     {
-        pVel.x = -2.0;
+        pVel.x = -PLAYER_X_SPEED;
     }
-    if (m_player->getComponent<CInput>().right)
+    if (m_player->getComponent<CInput>().right && (!m_onTheLeftWall))
     {
-        pVel.x = 2.0;
+        pVel.x = PLAYER_X_SPEED;
     }
     if (m_player->getComponent<CInput>().up && (m_player->getComponent<CState>().state != STATE_AIR))
     {
         m_player->getComponent<CState>().state = STATE_AIR;
-        pVel.y = -15.0;
+        pVel.y = -PLAYER_JUMP_SPEED;
     }
     // if (m_player->getComponent<CInput>().up)
     // {
@@ -171,17 +209,17 @@ void Scene_Play::sMovement()
     // }
     // if (m_player->getComponent<CInput>().down && (m_player->getComponent<CState>().state != STATE_ON_GROUND))
     // {
-    //     pVel.y = 2.0;
+    //     pVel.y = 0.5;
     // }
 
     if (m_player->getComponent<CState>().state == STATE_ON_GROUND)
     {
         pVel.y = 0;
     }
-    if (m_onTheWall && (m_player->getComponent<CState>().state != STATE_ON_GROUND))
-    {
-        pVel.x = 0;
-    }
+    // if (m_onTheWall && (m_player->getComponent<CState>().state != STATE_ON_GROUND))
+    // {
+    //     pVel.x = 0;
+    // }
     m_player->getComponent<CTransform>().velocity = pVel;
 
     for (auto e : m_entities.getEntities())
@@ -210,6 +248,8 @@ void Scene_Play::sCollision()
 
     bool stillOnTheGround = false;
     m_onTheWall = false;
+    m_onTheLeftWall = false;
+    m_onTheRightWall = false;
 
     for (auto e : m_entities.getEntities(TILE_TAG))
     {
@@ -218,30 +258,7 @@ void Scene_Play::sCollision()
 
         if ((overlap.x > 0) && (overlap.y > 0))
         {
-            if (prevOverlap.x == 0)
-            {
-                m_player->getComponent<CTransform>().velocity.x = 0;
-
-                // Moving left to right
-                if (m_player->getComponent<CTransform>().pos.x >
-                    m_player->getComponent<CTransform>().prevPos.x)
-                {
-                    m_player->getComponent<CTransform>().pos.x =
-                        e->getComponent<CTransform>().pos.x -
-                        e->getComponent<CBoundingBox>().halfSize.x -
-                        m_player->getComponent<CBoundingBox>().halfSize.x;
-                }
-                // Moving right to left
-                if (m_player->getComponent<CTransform>().pos.x <
-                    m_player->getComponent<CTransform>().prevPos.x)
-                {
-                    m_player->getComponent<CTransform>().pos.x =
-                        e->getComponent<CTransform>().pos.x +
-                        e->getComponent<CBoundingBox>().halfSize.x +
-                        m_player->getComponent<CBoundingBox>().halfSize.x;
-                }
-            }
-            if (prevOverlap.y == 0)
+            if (prevOverlap.y <= 0)
             {
                 m_player->getComponent<CTransform>().velocity.y = 0;
 
@@ -266,9 +283,33 @@ void Scene_Play::sCollision()
                         m_player->getComponent<CBoundingBox>().halfSize.y;
                 }
             }
+            
+            if (prevOverlap.x <= 0)
+            {
+                m_player->getComponent<CTransform>().velocity.x = 0;
+
+                // Moving left to right
+                if (m_player->getComponent<CTransform>().pos.x >
+                    m_player->getComponent<CTransform>().prevPos.x)
+                {
+                    m_player->getComponent<CTransform>().pos.x =
+                        e->getComponent<CTransform>().pos.x -
+                        e->getComponent<CBoundingBox>().halfSize.x -
+                        m_player->getComponent<CBoundingBox>().halfSize.x;
+                }
+                // Moving right to left
+                if (m_player->getComponent<CTransform>().pos.x <
+                    m_player->getComponent<CTransform>().prevPos.x)
+                {
+                    m_player->getComponent<CTransform>().pos.x =
+                        e->getComponent<CTransform>().pos.x +
+                        e->getComponent<CBoundingBox>().halfSize.x +
+                        m_player->getComponent<CBoundingBox>().halfSize.x;
+                }
+            }
         }
         // we moved a player on top of tile and if so we are on the ground. When player moves off tiles, this won't work
-        if ((overlap.x > 0) && (overlap.y == 0))
+        if ((overlap.x >= 0) && (overlap.y == 0))
         {
             if ((prevOverlap.y >= 0) &&
                 (m_player->getComponent<CTransform>().pos.y < e->getComponent<CTransform>().pos.y))
@@ -276,12 +317,22 @@ void Scene_Play::sCollision()
                 stillOnTheGround = true;
             }
         }
+
+        overlap = Physics::getOverlap(m_player, e);
+        prevOverlap = Physics::getPreviousOverlap(m_player, e);
+
         if ((overlap.x == 0) && (overlap.y > 0))
         {
-            if (prevOverlap.x >= 0) //&&
-                                    //(m_player->getComponent<CTransform>().pos.x < e->getComponent<CTransform>().pos.y))
+            if (prevOverlap.x >= 0)
             {
-                m_onTheWall = true;
+                if (m_player->getComponent<CTransform>().pos.x < e->getComponent<CTransform>().pos.x)
+                {
+                    m_onTheLeftWall = true;
+                }
+                if (m_player->getComponent<CTransform>().pos.x > e->getComponent<CTransform>().pos.x)
+                {
+                    m_onTheRightWall = true;
+                }
             }
         }
     }
@@ -293,6 +344,27 @@ void Scene_Play::sCollision()
     else
     {
         m_player->getComponent<CState>().state = STATE_AIR;
+    }
+}
+
+void Scene_Play::sAnimation()
+{
+    // TODO: Think of fixing left-right blinking when on the wall
+
+    for (auto e : m_entities.getEntities())
+    {
+        if (e->hasComponent<CAnimation>())
+        {
+            auto &sprite = e->getComponent<CAnimation>().animation.getSprite();
+
+            if (((sprite.getScale().x > 0) &&
+                 (e->getComponent<CTransform>().velocity.x > 0)) ||
+                ((sprite.getScale().x < 0) &&
+                 (e->getComponent<CTransform>().velocity.x < 0)))
+            {
+                sprite.setScale({sprite.getScale().x * -1, sprite.getScale().y});
+            }
+        }
     }
 }
 // Systems above
@@ -315,6 +387,7 @@ void Scene_Play::update()
 
     sMovement();
     sCollision();
+    sAnimation();
     sRender();
 
     m_currentFrame++;
@@ -333,6 +406,21 @@ Vec2 Scene_Play::gridToMidPixel(float gridX, float gridY, std::shared_ptr<Entity
     y = height() - gridY * m_gridSize.y - y / 2;
 
     return Vec2(x, y);
+}
+
+void Scene_Play::drawTextures()
+{
+    for (auto e : m_entities.getEntities())
+    {
+        if (e->hasComponent<CAnimation>())
+        {
+            auto sprite = e->getComponent<CAnimation>().animation.getSprite();
+            auto pos = e->getComponent<CTransform>().pos;
+            sprite.setPosition({pos.x, pos.y});
+
+            m_gameEngine->window().draw(sprite);
+        }
+    }
 }
 
 void Scene_Play::drawCollisionBoxes()
@@ -399,7 +487,8 @@ void Scene_Play::spawnPlayer()
 
     player->addComponent<CBoundingBox>(Vec2(48, 48));
     player->addComponent<CTransform>(gridToMidPixel(4, 6, player));
-    player->addComponent<CGravity>(0.5);
+    player->addComponent<CGravity>(0.1);
+    player->addComponent<CAnimation>(m_gameEngine->assets().getAnimation("stand"), false);
 
     m_player = player;
 }
