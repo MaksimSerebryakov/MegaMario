@@ -69,60 +69,74 @@ void Assets::loadFromFile(const std::string &path)
     addFont("Lato", "fonts/Lato.ttf");
     addFont("8bit", "fonts/8bit.ttf");
 
-    addTexture("stand", "images/stand.png");
-    addTexture("ground", "images/ground.png");
-    addTexture("brick", "images/brick.png");
-    addTexture("greenTube", "images/greenTube.png");
+    addTexture(ASSET_STANDING, "images/stand.png");
+    addTexture(ASSET_GROUND_TILE, "images/ground.png");
+    addTexture(ASSET_BRICK_TILE, "images/brick.png");
+    addTexture(ASSET_GREENTUBE_TALL, "images/greenTubeTall.png");
+    addTexture(ASSET_RUNNING, "images/running.png");
 
-    sf::Sprite sprite(getTexture("stand"));
-    sprite.setTextureRect(sf::IntRect({0, 0}, {22, 24}));
+    sf::Sprite sprite(getTexture(ASSET_STANDING));
+    sprite.setTextureRect(sf::IntRect({0, 0}, {24, 24}));
     sprite.setScale({-2.0, 2.0});
     addAnimation(
-        "stand",
+        ASSET_STANDING,
         Animation(
             sprite,
-            2,
+            180,
             0,
-            1,
-            Vec2(22.0, 24.0),
-            "stand"));
+            170,
+            Vec2(24.0, 24.0),
+            ASSET_STANDING));
 
-    sprite.setTexture(getTexture("ground"));
+    sprite.setTexture(getTexture(ASSET_RUNNING));
+    sprite.setTextureRect(sf::IntRect({0, 0}, {25, 24}));
+    sprite.setScale({-2.0, 2.0});
+    addAnimation(
+        ASSET_RUNNING,
+        Animation(
+            sprite,
+            40,
+            0,
+            10,
+            Vec2(25.0, 24.0),
+            ASSET_RUNNING));
+
+    sprite.setTexture(getTexture(ASSET_GROUND_TILE));
     sprite.setTextureRect(sf::IntRect({0, 0}, {16, 16}));
     sprite.setScale({4.0, 4.0});
     addAnimation(
-        "ground",
+        ASSET_GROUND_TILE,
         Animation(
             sprite,
             1,
             0,
             0,
             Vec2(16.0, 16.0),
-            "ground"));
+            ASSET_GROUND_TILE));
 
-    sprite.setTexture(getTexture("brick"));
+    sprite.setTexture(getTexture(ASSET_BRICK_TILE));
     sprite.setTextureRect(sf::IntRect({0, 0}, {16, 16}));
     sprite.setScale({4.0, 4.0});
     addAnimation(
-        "brick",
+        ASSET_BRICK_TILE,
         Animation(
             sprite,
             1,
             0,
             0,
             Vec2(16.0, 16.0),
-            "brick"));
+            ASSET_BRICK_TILE));
 
-    sprite.setTexture(getTexture("greenTube"));
+    sprite.setTexture(getTexture(ASSET_GREENTUBE_TALL));
     sprite.setTextureRect(sf::IntRect({0, 0}, {32, 64}));
     sprite.setScale({4.0, 4.0});
     addAnimation(
-        "greenTube",
+        ASSET_GREENTUBE_TALL,
         Animation(
             sprite,
             1,
             0,
-            1,
+            0,
             Vec2(32.0, 64.0),
-            "greenTube"));
+            ASSET_GREENTUBE_TALL));
 }

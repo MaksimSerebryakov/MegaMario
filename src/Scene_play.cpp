@@ -39,30 +39,30 @@ void Scene_Play::loadLevel(const std::string &filename)
     auto brick = m_entities.addEntity(TILE_TAG);
     brick->addComponent<CBoundingBox>(Vec2(64, 64));
     brick->addComponent<CTransform>(gridToMidPixel(6, 6, brick));
-    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation("brick"), false);
+    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BRICK_TILE), false);
 
     brick = m_entities.addEntity(TILE_TAG);
     brick->addComponent<CBoundingBox>(Vec2(64, 64));
     brick->addComponent<CTransform>(gridToMidPixel(1, 1, brick));
-    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation("brick"), false);
+    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BRICK_TILE), false);
 
     brick = m_entities.addEntity(TILE_TAG);
     brick->addComponent<CBoundingBox>(Vec2(64, 64));
     brick->addComponent<CTransform>(gridToMidPixel(4, 2, brick));
-    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation("brick"), false);
+    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BRICK_TILE), false);
     brick = m_entities.addEntity(TILE_TAG);
     brick->addComponent<CBoundingBox>(Vec2(64, 64));
     brick->addComponent<CTransform>(gridToMidPixel(4, 3, brick));
-    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation("brick"), false);
+    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BRICK_TILE), false);
 
     brick = m_entities.addEntity(TILE_TAG);
     brick->addComponent<CBoundingBox>(Vec2(64, 64));
     brick->addComponent<CTransform>(gridToMidPixel(7, 2, brick));
-    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation("brick"), false);
+    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BRICK_TILE), false);
     brick = m_entities.addEntity(TILE_TAG);
     brick->addComponent<CBoundingBox>(Vec2(64, 64));
     brick->addComponent<CTransform>(gridToMidPixel(7, 3, brick));
-    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation("brick"), false);
+    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BRICK_TILE), false);
 
     // brick = m_entities.addEntity(TILE_TAG);
     // brick->addComponent<CBoundingBox>(Vec2(64, 64));
@@ -71,33 +71,28 @@ void Scene_Play::loadLevel(const std::string &filename)
 
     brick = m_entities.addEntity(TILE_TAG);
     brick->addComponent<CBoundingBox>(Vec2(64, 64));
-    brick->addComponent<CTransform>(gridToMidPixel(4, 6, brick));
-    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation("brick"), false);
-
-    brick = m_entities.addEntity(TILE_TAG);
-    brick->addComponent<CBoundingBox>(Vec2(64, 64));
     brick->addComponent<CTransform>(gridToMidPixel(5, 6, brick));
-    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation("brick"), false);
+    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BRICK_TILE), false);
 
     auto tube = m_entities.addEntity(TILE_TAG);
     tube->addComponent<CBoundingBox>(Vec2(128, 256));
     tube->addComponent<CTransform>(gridToMidPixel(8, 0, tube));
-    tube->addComponent<CAnimation>(m_gameEngine->assets().getAnimation("greenTube"), false);
+    tube->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_GREENTUBE_TALL), false);
 
-    for (int i = 0; i < 20; i++)
+    for (int i = 0; i < 100; i++)
     {
-        if ((i != 10) && (i != 15))
-        {
-            auto e = m_entities.addEntity(TILE_TAG);
+        auto e = m_entities.addEntity(TILE_TAG);
 
-            e->addComponent<CBoundingBox>(Vec2(64, 64));
-            e->addComponent<CTransform>(gridToMidPixel(i, 0, e));
-            e->addComponent<CAnimation>(m_gameEngine->assets().getAnimation("ground"), false);
-        }
+        e->addComponent<CBoundingBox>(Vec2(64, 64));
+        e->addComponent<CTransform>(gridToMidPixel(i, 0, e));
+        e->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_GROUND_TILE), false);
     }
 }
 
-// Systems
+// ************************************
+// *-------------SYSTEMS--------------*
+// ************************************
+
 void Scene_Play::sDoAction(const Action &action)
 {
     // Since we have only 2 Action types now, we can use if/else, not if(action_start), if(action_end)
@@ -283,7 +278,7 @@ void Scene_Play::sCollision()
                         m_player->getComponent<CBoundingBox>().halfSize.y;
                 }
             }
-            
+
             if (prevOverlap.x <= 0)
             {
                 m_player->getComponent<CTransform>().velocity.x = 0;
@@ -351,10 +346,38 @@ void Scene_Play::sAnimation()
 {
     // TODO: Think of fixing left-right blinking when on the wall
 
+    // Change player's animation
+    if (m_player->hasComponent<CAnimation>())
+    {
+        // TODO: add jumping animation
+        if (m_player->getComponent<CTransform>().velocity.x != 0)
+        {
+            if (m_player->getComponent<CAnimation>().animation.getName() != ASSET_RUNNING)
+            {
+                m_player->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_RUNNING), true);
+            }
+        }
+        else
+        {
+            if (m_player->getComponent<CAnimation>().animation.getName() != ASSET_STANDING)
+            {
+                float scaleX = m_player->getComponent<CAnimation>().animation.getSprite().getScale().x;
+
+                m_player->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_STANDING), true);
+
+                auto &sprite = m_player->getComponent<CAnimation>().animation.getSprite();
+                sprite.setScale({scaleX, sprite.getScale().y});
+            }
+        }
+    }
+
+    // Update animations
     for (auto e : m_entities.getEntities())
     {
         if (e->hasComponent<CAnimation>())
         {
+            e->getComponent<CAnimation>().animation.update();
+
             auto &sprite = e->getComponent<CAnimation>().animation.getSprite();
 
             if (((sprite.getScale().x > 0) &&
@@ -367,7 +390,10 @@ void Scene_Play::sAnimation()
         }
     }
 }
-// Systems above
+
+// ************************************
+// *----------SYSTEMS ABOVE-----------*
+// ************************************
 
 void Scene_Play::doAction(const Action &action)
 {
@@ -487,8 +513,8 @@ void Scene_Play::spawnPlayer()
 
     player->addComponent<CBoundingBox>(Vec2(48, 48));
     player->addComponent<CTransform>(gridToMidPixel(4, 6, player));
-    player->addComponent<CGravity>(0.1);
-    player->addComponent<CAnimation>(m_gameEngine->assets().getAnimation("stand"), false);
+    player->addComponent<CGravity>(0.5);
+    player->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_STANDING), true);
 
     m_player = player;
 }

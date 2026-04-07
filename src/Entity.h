@@ -66,5 +66,6 @@ public:
     void removeComponent()
     {
         getComponent<T>() = T();
+        getComponent<T>().has = false;
     }
 };

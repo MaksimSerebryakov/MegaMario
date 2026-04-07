@@ -12,8 +12,8 @@
 #define ACTION_LEFT "LEFT"
 #define ACTION_RIGHT "RIGHT"
 
-#define PLAYER_X_SPEED 3.0
-#define PLAYER_JUMP_SPEED 7.0
+#define PLAYER_X_SPEED 4.0
+#define PLAYER_JUMP_SPEED 15.0
 
 class GameEngine;
 

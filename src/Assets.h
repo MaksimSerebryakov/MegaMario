@@ -6,6 +6,12 @@
 
 #include "Animation.h"
 
+#define ASSET_STANDING "stand"
+#define ASSET_GROUND_TILE "ground"
+#define ASSET_BRICK_TILE "brick"
+#define ASSET_GREENTUBE_TALL "greenTubeTall"
+#define ASSET_RUNNING "running"
+
 typedef std::map<std::string, sf::Texture> TextureMap;
 typedef std::map<std::string, Animation> AnimationMap;
 typedef std::map<std::string, sf::Font> FontMap;

@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "Animation.h"
 
 Animation::Animation()
@@ -22,12 +24,38 @@ Animation::Animation(
     m_sprite.setOrigin({size.x / 2, size.y / 2});
 }
 
-const Vec2 &Animation::getSize() const
+void Animation::update()
 {
-    return m_size;
+    if (m_speed == 0)
+    {
+        return;
+    }
+    int textureOffsetX = ((m_currentFrame % m_frameCount) / m_speed) * (int)m_size.x;
+
+    m_sprite.setTextureRect(sf::IntRect(
+        {textureOffsetX, 0},
+        {(int)m_size.x, (int)m_size.y}));
+
+    m_currentFrame++;
+}
+
+const Vec2 Animation::getSize() const
+{
+    return Vec2(m_size.x * m_sprite.getScale().x, m_size.y * m_sprite.getScale().y);
+}
+
+const std::string &Animation::getName() const
+{
+    return m_name;
 }
 
 sf::Sprite &Animation::getSprite()
 {
     return m_sprite;
+}
+
+bool Animation::hasEnded()
+{
+    // TODO: add logic
+    return false;
 }
