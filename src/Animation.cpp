@@ -21,6 +21,7 @@ Animation::Animation(
 {
     m_sprite = sprite;
 
+    
     m_sprite.setOrigin({size.x / 2, size.y / 2});
 }
 
@@ -41,6 +42,8 @@ void Animation::update()
 
 const Vec2 Animation::getSize() const
 {
+    Vec2 v(m_size.x * m_sprite.getScale().x, m_size.y * m_sprite.getScale().y);
+
     return Vec2(m_size.x * m_sprite.getScale().x, m_size.y * m_sprite.getScale().y);
 }
 
@@ -56,6 +59,10 @@ sf::Sprite &Animation::getSprite()
 
 bool Animation::hasEnded()
 {
-    // TODO: add logic
+    if ((m_currentFrame > 0) && (m_currentFrame % m_frameCount == 0))
+    {
+        return true;
+    }
+
     return false;
 }

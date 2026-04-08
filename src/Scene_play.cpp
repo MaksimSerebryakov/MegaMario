@@ -38,31 +38,33 @@ void Scene_Play::loadLevel(const std::string &filename)
 
     auto brick = m_entities.addEntity(TILE_TAG);
     brick->addComponent<CBoundingBox>(Vec2(64, 64));
+    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BRICK_TILE), false);
     brick->addComponent<CTransform>(gridToMidPixel(6, 6, brick));
-    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BRICK_TILE), false);
 
     brick = m_entities.addEntity(TILE_TAG);
     brick->addComponent<CBoundingBox>(Vec2(64, 64));
+    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BRICK_TILE), false);
     brick->addComponent<CTransform>(gridToMidPixel(1, 1, brick));
-    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BRICK_TILE), false);
 
     brick = m_entities.addEntity(TILE_TAG);
     brick->addComponent<CBoundingBox>(Vec2(64, 64));
+    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BRICK_TILE), false);
     brick->addComponent<CTransform>(gridToMidPixel(4, 2, brick));
-    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BRICK_TILE), false);
-    brick = m_entities.addEntity(TILE_TAG);
-    brick->addComponent<CBoundingBox>(Vec2(64, 64));
-    brick->addComponent<CTransform>(gridToMidPixel(4, 3, brick));
-    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BRICK_TILE), false);
 
     brick = m_entities.addEntity(TILE_TAG);
     brick->addComponent<CBoundingBox>(Vec2(64, 64));
-    brick->addComponent<CTransform>(gridToMidPixel(7, 2, brick));
     brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BRICK_TILE), false);
+    brick->addComponent<CTransform>(gridToMidPixel(4, 3, brick));
+
     brick = m_entities.addEntity(TILE_TAG);
     brick->addComponent<CBoundingBox>(Vec2(64, 64));
-    brick->addComponent<CTransform>(gridToMidPixel(7, 3, brick));
     brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BRICK_TILE), false);
+    brick->addComponent<CTransform>(gridToMidPixel(7, 2, brick));
+
+    brick = m_entities.addEntity(TILE_TAG);
+    brick->addComponent<CBoundingBox>(Vec2(64, 64));
+    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BRICK_TILE), false);
+    brick->addComponent<CTransform>(gridToMidPixel(7, 3, brick));
 
     // brick = m_entities.addEntity(TILE_TAG);
     // brick->addComponent<CBoundingBox>(Vec2(64, 64));
@@ -71,21 +73,21 @@ void Scene_Play::loadLevel(const std::string &filename)
 
     brick = m_entities.addEntity(TILE_TAG);
     brick->addComponent<CBoundingBox>(Vec2(64, 64));
-    brick->addComponent<CTransform>(gridToMidPixel(5, 6, brick));
     brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BRICK_TILE), false);
+    brick->addComponent<CTransform>(gridToMidPixel(5, 6, brick));
 
     auto tube = m_entities.addEntity(TILE_TAG);
     tube->addComponent<CBoundingBox>(Vec2(128, 256));
-    tube->addComponent<CTransform>(gridToMidPixel(8, 0, tube));
     tube->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_GREENTUBE_TALL), false);
+    tube->addComponent<CTransform>(gridToMidPixel(8, 0, tube));
 
     for (int i = 0; i < 100; i++)
     {
         auto e = m_entities.addEntity(TILE_TAG);
 
         e->addComponent<CBoundingBox>(Vec2(64, 64));
-        e->addComponent<CTransform>(gridToMidPixel(i, 0, e));
         e->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_GROUND_TILE), false);
+        e->addComponent<CTransform>(gridToMidPixel(i, 0, e));
     }
 }
 
@@ -197,6 +199,13 @@ void Scene_Play::sMovement()
     {
         m_player->getComponent<CState>().state = STATE_AIR;
         pVel.y = -PLAYER_JUMP_SPEED;
+    }
+    if (!m_player->getComponent<CInput>().up && (m_player->getComponent<CState>().state == STATE_AIR))
+    {
+        if (pVel.y < 0)
+        {
+            pVel.y = 0;
+        }
     }
     // if (m_player->getComponent<CInput>().up)
     // {
@@ -349,23 +358,37 @@ void Scene_Play::sAnimation()
     // Change player's animation
     if (m_player->hasComponent<CAnimation>())
     {
-        // TODO: add jumping animation
-        if (m_player->getComponent<CTransform>().velocity.x != 0)
+        auto &playerAnimation = m_player->getComponent<CAnimation>().animation;
+
+        if (m_player->getComponent<CState>().state == STATE_AIR)
         {
-            if (m_player->getComponent<CAnimation>().animation.getName() != ASSET_RUNNING)
+            // Save previous direction of animation on X axis
+            float scaleX = playerAnimation.getSprite().getScale().x;
+
+            m_player->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_JUMPING), true);
+
+            // Set prev animation direction of X axis
+            auto &sprite = playerAnimation.getSprite();
+            sprite.setScale({scaleX, sprite.getScale().y});
+        }
+        else if (m_player->getComponent<CInput>().left || m_player->getComponent<CInput>().right)
+        {
+            if (playerAnimation.getName() != ASSET_RUNNING)
             {
                 m_player->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_RUNNING), true);
             }
         }
         else
         {
-            if (m_player->getComponent<CAnimation>().animation.getName() != ASSET_STANDING)
+            if (playerAnimation.getName() != ASSET_STANDING)
             {
-                float scaleX = m_player->getComponent<CAnimation>().animation.getSprite().getScale().x;
+                // Save previous direction of animation on X axis
+                float scaleX = playerAnimation.getSprite().getScale().x;
 
                 m_player->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_STANDING), true);
 
-                auto &sprite = m_player->getComponent<CAnimation>().animation.getSprite();
+                // Set prev animation direction of X axis
+                auto &sprite = playerAnimation.getSprite();
                 sprite.setScale({scaleX, sprite.getScale().y});
             }
         }
@@ -422,11 +445,17 @@ void Scene_Play::update()
 Vec2 Scene_Play::gridToMidPixel(float gridX, float gridY, std::shared_ptr<Entity> entity)
 {
     // TODO: uncomment when animation is added
-    // float x = entity->getComponent<CAnimation>().animation.getSize().x;
-    // float y = entity->getComponent<CAnimation>().animation.getSize().y;
+    float x = entity->getComponent<CAnimation>().animation.getSize().x;
+    float y = entity->getComponent<CAnimation>().animation.getSize().y;
 
-    float x = entity->getComponent<CBoundingBox>().size.x;
-    float y = entity->getComponent<CBoundingBox>().size.y;
+    // std::cout << x << " " << y << std::endl;
+
+    // x = entity->getComponent<CBoundingBox>().size.x;
+    // y = entity->getComponent<CBoundingBox>().size.y;
+
+    // std::cout << x << " " << y << std::endl;
+
+    // std::cout << std::endl;
 
     x = gridX * m_gridSize.x + x / 2;
     y = height() - gridY * m_gridSize.y - y / 2;
@@ -512,9 +541,9 @@ void Scene_Play::spawnPlayer()
     auto player = m_entities.addEntity(PLAYER_TAG);
 
     player->addComponent<CBoundingBox>(Vec2(48, 48));
+    player->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_JUMPING), true);
     player->addComponent<CTransform>(gridToMidPixel(4, 6, player));
     player->addComponent<CGravity>(0.5);
-    player->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_STANDING), true);
 
     m_player = player;
 }

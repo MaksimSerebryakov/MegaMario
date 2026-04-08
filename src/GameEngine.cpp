@@ -72,18 +72,20 @@ void GameEngine::sUserInput()
 void GameEngine::changeScene(const std::string &sceneName, std::shared_ptr<Scene> scene,
                              bool endCurrentScene)
 {
-    if (m_scenes.find(sceneName) == m_scenes.end())
-    {
-        m_scenes[sceneName] = scene;
-    }
+    m_scenes[sceneName] = scene;
+    m_currentScene = sceneName;
+    // if (m_scenes.find(sceneName) == m_scenes.end())
+    // {
+    //     m_scenes[sceneName] = scene;
+    // }
 
-    // Return window center to starting point TODO: mb need to solve that other way
+    // // Return window center to starting point TODO: mb need to solve that other way
     sf::View view = m_window.getView();
     view.setCenter({m_window.getSize().x / (float)2.0,
                     view.getCenter().y});
     m_window.setView(view);
 
-    m_currentScene = sceneName;
+    // m_currentScene = sceneName;
 }
 
 bool GameEngine::isRunning()

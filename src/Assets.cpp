@@ -74,6 +74,7 @@ void Assets::loadFromFile(const std::string &path)
     addTexture(ASSET_BRICK_TILE, "images/brick.png");
     addTexture(ASSET_GREENTUBE_TALL, "images/greenTubeTall.png");
     addTexture(ASSET_RUNNING, "images/running.png");
+    addTexture(ASSET_JUMPING, "images/jumping.png");
 
     sf::Sprite sprite(getTexture(ASSET_STANDING));
     sprite.setTextureRect(sf::IntRect({0, 0}, {24, 24}));
@@ -87,6 +88,19 @@ void Assets::loadFromFile(const std::string &path)
             170,
             Vec2(24.0, 24.0),
             ASSET_STANDING));
+
+    sprite.setTexture(getTexture(ASSET_JUMPING));
+    sprite.setTextureRect(sf::IntRect({0, 0}, {24, 29}));
+    sprite.setScale({-2.0, 2.0});
+    addAnimation(
+        ASSET_JUMPING,
+        Animation(
+            sprite,
+            1,
+            0,
+            0,
+            Vec2(24.0, 29.0),
+            ASSET_JUMPING));
 
     sprite.setTexture(getTexture(ASSET_RUNNING));
     sprite.setTextureRect(sf::IntRect({0, 0}, {25, 24}));

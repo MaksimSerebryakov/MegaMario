@@ -11,6 +11,7 @@
 #define ASSET_BRICK_TILE "brick"
 #define ASSET_GREENTUBE_TALL "greenTubeTall"
 #define ASSET_RUNNING "running"
+#define ASSET_JUMPING "jumping"
 
 typedef std::map<std::string, sf::Texture> TextureMap;
 typedef std::map<std::string, Animation> AnimationMap;
