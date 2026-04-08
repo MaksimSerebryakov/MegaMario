@@ -36,6 +36,7 @@ protected:
     // dummy font as sf::Text doesn't have default constructor
     sf::Font m_font;
     sf::Text m_gridText;
+    bool m_stillOnTheGround = false;
     bool m_onTheWall = false;
     bool m_onTheRightWall = false;
     bool m_onTheLeftWall = false;
@@ -51,6 +52,9 @@ protected:
     void sDebug();                        // System: debug system
     void sEnemySpawner();                 // System: enemy spawner system
     void sCollision();                    // System: Collision system
+
+    void solvePlayerTileCollision(std::shared_ptr<Entity> e);
+    void solvePlayerWallCollision();
 
     void loadLevel(const std::string &filename); // load entities from level config file
 

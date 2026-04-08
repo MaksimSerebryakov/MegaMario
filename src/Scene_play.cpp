@@ -250,98 +250,17 @@ void Scene_Play::sCollision()
 {
     m_player->getComponent<CState>().state = STATE_AIR;
 
-    bool stillOnTheGround = false;
+    m_stillOnTheGround = false;
     m_onTheWall = false;
     m_onTheLeftWall = false;
     m_onTheRightWall = false;
 
     for (auto e : m_entities.getEntities(TILE_TAG))
     {
-        Vec2 overlap = Physics::getOverlap(m_player, e);
-        Vec2 prevOverlap = Physics::getPreviousOverlap(m_player, e);
-
-        if ((overlap.x > 0) && (overlap.y > 0))
-        {
-            if (prevOverlap.y <= 0)
-            {
-                m_player->getComponent<CTransform>().velocity.y = 0;
-
-                // Moving down
-                if (m_player->getComponent<CTransform>().pos.y >
-                    m_player->getComponent<CTransform>().prevPos.y)
-                {
-                    m_player->getComponent<CState>().state = STATE_ON_GROUND;
-                    stillOnTheGround = true;
-                    m_player->getComponent<CTransform>().pos.y =
-                        e->getComponent<CTransform>().pos.y -
-                        e->getComponent<CBoundingBox>().halfSize.y -
-                        m_player->getComponent<CBoundingBox>().halfSize.y;
-                }
-                // Moving up
-                if (m_player->getComponent<CTransform>().pos.y <
-                    m_player->getComponent<CTransform>().prevPos.y)
-                {
-                    m_player->getComponent<CTransform>().pos.y =
-                        e->getComponent<CTransform>().pos.y +
-                        e->getComponent<CBoundingBox>().halfSize.y +
-                        m_player->getComponent<CBoundingBox>().halfSize.y;
-                }
-            }
-
-            if (prevOverlap.x <= 0)
-            {
-                m_player->getComponent<CTransform>().velocity.x = 0;
-
-                // Moving left to right
-                if (m_player->getComponent<CTransform>().pos.x >
-                    m_player->getComponent<CTransform>().prevPos.x)
-                {
-                    m_player->getComponent<CTransform>().pos.x =
-                        e->getComponent<CTransform>().pos.x -
-                        e->getComponent<CBoundingBox>().halfSize.x -
-                        m_player->getComponent<CBoundingBox>().halfSize.x;
-                }
-                // Moving right to left
-                if (m_player->getComponent<CTransform>().pos.x <
-                    m_player->getComponent<CTransform>().prevPos.x)
-                {
-                    m_player->getComponent<CTransform>().pos.x =
-                        e->getComponent<CTransform>().pos.x +
-                        e->getComponent<CBoundingBox>().halfSize.x +
-                        m_player->getComponent<CBoundingBox>().halfSize.x;
-                }
-            }
-        }
-        // we moved a player on top of tile and if so we are on the ground. When player moves off tiles, this won't work
-        if ((overlap.x >= 0) && (overlap.y == 0))
-        {
-            if ((prevOverlap.y >= 0) &&
-                (m_player->getComponent<CTransform>().pos.y < e->getComponent<CTransform>().pos.y))
-            {
-                stillOnTheGround = true;
-            }
-        }
-
-        overlap = Physics::getOverlap(m_player, e);
-        prevOverlap = Physics::getPreviousOverlap(m_player, e);
-
-        if ((overlap.x == 0) && (overlap.y > 0))
-        {
-            if (prevOverlap.x >= 0)
-            {
-                if (m_player->getComponent<CTransform>().pos.x < e->getComponent<CTransform>().pos.x)
-                {
-                    m_onTheLeftWall = true;
-                }
-                if (m_player->getComponent<CTransform>().pos.x > e->getComponent<CTransform>().pos.x)
-                {
-                    m_onTheRightWall = true;
-                }
-            }
-        }
+        solvePlayerTileCollision(e);
     }
 
-    if (stillOnTheGround)
+    if (m_stillOnTheGround)
     {
         m_player->getComponent<CState>().state = STATE_ON_GROUND;
     }
@@ -349,6 +268,8 @@ void Scene_Play::sCollision()
     {
         m_player->getComponent<CState>().state = STATE_AIR;
     }
+
+    solvePlayerWallCollision();
 }
 
 void Scene_Play::sAnimation()
@@ -418,6 +339,105 @@ void Scene_Play::sAnimation()
 // *----------SYSTEMS ABOVE-----------*
 // ************************************
 
+void Scene_Play::solvePlayerTileCollision(std::shared_ptr<Entity> e)
+{
+    Vec2 overlap = Physics::getOverlap(m_player, e);
+    Vec2 prevOverlap = Physics::getPreviousOverlap(m_player, e);
+
+    if ((overlap.x > 0) && (overlap.y > 0))
+    {
+        if (prevOverlap.y <= 0)
+        {
+            m_player->getComponent<CTransform>().velocity.y = 0;
+
+            // Moving down
+            if (m_player->getComponent<CTransform>().pos.y >
+                m_player->getComponent<CTransform>().prevPos.y)
+            {
+                m_player->getComponent<CState>().state = STATE_ON_GROUND;
+                m_stillOnTheGround = true;
+                m_player->getComponent<CTransform>().pos.y =
+                    e->getComponent<CTransform>().pos.y -
+                    e->getComponent<CBoundingBox>().halfSize.y -
+                    m_player->getComponent<CBoundingBox>().halfSize.y;
+            }
+            // Moving up
+            if (m_player->getComponent<CTransform>().pos.y <
+                m_player->getComponent<CTransform>().prevPos.y)
+            {
+                m_player->getComponent<CTransform>().pos.y =
+                    e->getComponent<CTransform>().pos.y +
+                    e->getComponent<CBoundingBox>().halfSize.y +
+                    m_player->getComponent<CBoundingBox>().halfSize.y;
+            }
+        }
+
+        if (prevOverlap.x <= 0)
+        {
+            m_player->getComponent<CTransform>().velocity.x = 0;
+
+            // Moving left to right
+            if (m_player->getComponent<CTransform>().pos.x >
+                m_player->getComponent<CTransform>().prevPos.x)
+            {
+                m_player->getComponent<CTransform>().pos.x =
+                    e->getComponent<CTransform>().pos.x -
+                    e->getComponent<CBoundingBox>().halfSize.x -
+                    m_player->getComponent<CBoundingBox>().halfSize.x;
+            }
+            // Moving right to left
+            if (m_player->getComponent<CTransform>().pos.x <
+                m_player->getComponent<CTransform>().prevPos.x)
+            {
+                m_player->getComponent<CTransform>().pos.x =
+                    e->getComponent<CTransform>().pos.x +
+                    e->getComponent<CBoundingBox>().halfSize.x +
+                    m_player->getComponent<CBoundingBox>().halfSize.x;
+            }
+        }
+    }
+    // we moved a player on top of tile and if so we are on the ground. When player moves off tiles, this won't work
+    if ((overlap.x >= 0) && (overlap.y == 0))
+    {
+        if ((prevOverlap.y >= 0) &&
+            (m_player->getComponent<CTransform>().pos.y < e->getComponent<CTransform>().pos.y))
+        {
+            m_stillOnTheGround = true;
+        }
+    }
+
+    overlap = Physics::getOverlap(m_player, e);
+    prevOverlap = Physics::getPreviousOverlap(m_player, e);
+
+    if ((overlap.x == 0) && (overlap.y > 0))
+    {
+        if (prevOverlap.x >= 0)
+        {
+            if (m_player->getComponent<CTransform>().pos.x < e->getComponent<CTransform>().pos.x)
+            {
+                m_onTheLeftWall = true;
+            }
+            if (m_player->getComponent<CTransform>().pos.x > e->getComponent<CTransform>().pos.x)
+            {
+                m_onTheRightWall = true;
+            }
+        }
+    }
+}
+
+void Scene_Play::solvePlayerWallCollision()
+{
+    float windowLeft = m_gameEngine->window().getView().getCenter().x -
+                       m_gameEngine->window().getSize().x / 2;
+
+    if ((m_player->getComponent<CTransform>().pos.x -
+         m_player->getComponent<CBoundingBox>().halfSize.x) < windowLeft)
+    {
+        m_player->getComponent<CTransform>().pos.x =
+            m_player->getComponent<CBoundingBox>().halfSize.x + windowLeft;
+    }
+}
+
 void Scene_Play::doAction(const Action &action)
 {
     sDoAction(action);
@@ -444,18 +464,11 @@ void Scene_Play::update()
 
 Vec2 Scene_Play::gridToMidPixel(float gridX, float gridY, std::shared_ptr<Entity> entity)
 {
-    // TODO: uncomment when animation is added
     float x = entity->getComponent<CAnimation>().animation.getSize().x;
     float y = entity->getComponent<CAnimation>().animation.getSize().y;
 
-    // std::cout << x << " " << y << std::endl;
-
     // x = entity->getComponent<CBoundingBox>().size.x;
     // y = entity->getComponent<CBoundingBox>().size.y;
-
-    // std::cout << x << " " << y << std::endl;
-
-    // std::cout << std::endl;
 
     x = gridX * m_gridSize.x + x / 2;
     y = height() - gridY * m_gridSize.y - y / 2;
