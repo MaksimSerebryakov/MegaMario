@@ -46,7 +46,11 @@ public:
 class CLifeSpan : public Component
 {
 public:
+    int remaining = 0;
+
     CLifeSpan() {}
+    CLifeSpan(int r)
+        : remaining(r) {}
 };
 
 class CInput : public Component

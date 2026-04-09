@@ -286,8 +286,6 @@ void Scene_Play::sCollision()
 
     solvePlayerWindowCollision();
     solveBulletWindowCollision();
-
-    std::cout << m_entities.getEntities(BULLET_TAG).size() << std::endl;
 }
 
 void Scene_Play::sAnimation()
@@ -299,16 +297,12 @@ void Scene_Play::sAnimation()
     {
         auto &playerAnimation = m_player->getComponent<CAnimation>().animation;
 
+        // Save previous direction of animation on X axis
+        float scaleX = playerAnimation.getSprite().getScale().x;
+
         if (m_player->getComponent<CState>().state == STATE_AIR)
         {
-            // Save previous direction of animation on X axis
-            float scaleX = playerAnimation.getSprite().getScale().x;
-
             m_player->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_JUMPING), true);
-
-            // Set prev animation direction of X axis
-            auto &sprite = playerAnimation.getSprite();
-            sprite.setScale({scaleX, sprite.getScale().y});
         }
         else if (m_player->getComponent<CInput>().left || m_player->getComponent<CInput>().right)
         {
@@ -321,16 +315,13 @@ void Scene_Play::sAnimation()
         {
             if (playerAnimation.getName() != ASSET_STANDING)
             {
-                // Save previous direction of animation on X axis
-                float scaleX = playerAnimation.getSprite().getScale().x;
-
                 m_player->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_STANDING), true);
-
-                // Set prev animation direction of X axis
-                auto &sprite = playerAnimation.getSprite();
-                sprite.setScale({scaleX, sprite.getScale().y});
             }
         }
+
+        // Set prev animation direction of X axis
+        auto &sprite = playerAnimation.getSprite();
+        sprite.setScale({scaleX, sprite.getScale().y});
     }
 
     // Update animations
@@ -348,6 +339,20 @@ void Scene_Play::sAnimation()
                  (e->getComponent<CTransform>().velocity.x < 0)))
             {
                 sprite.setScale({sprite.getScale().x * -1, sprite.getScale().y});
+            }
+        }
+    }
+}
+
+void Scene_Play::sLifespan()
+{
+    for (auto e : m_entities.getEntities())
+    {
+        if (e->hasComponent<CLifeSpan>())
+        {
+            if ((--e->getComponent<CLifeSpan>().remaining) <= 0)
+            {
+                e->destroy();
             }
         }
     }
@@ -491,7 +496,9 @@ void Scene_Play::solveBulletWindowCollision()
     float windowRight = m_gameEngine->window().getView().getCenter().x +
                         m_gameEngine->window().getSize().x / 2;
 
-    for (auto b : m_entities.getEntities(BULLET_TAG))
+    auto &bullets = m_entities.getEntities(BULLET_TAG);
+
+    for (auto b : bullets)
     {
         if (((b->getComponent<CTransform>().pos.x -
               b->getComponent<CBoundingBox>().halfSize.x) < windowLeft) ||
@@ -521,6 +528,7 @@ void Scene_Play::update()
 
     sMovement();
     sCollision();
+    sLifespan();
     sAnimation();
     sRender();
 
@@ -618,6 +626,7 @@ void Scene_Play::spawnBullet()
     auto bullet = m_entities.addEntity(BULLET_TAG);
     bullet->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BULLET), false);
     bullet->addComponent<CBoundingBox>(m_gameEngine->assets().getAnimation(ASSET_BULLET).getSize());
+    bullet->addComponent<CLifeSpan>(BULLET_LIFESPAN);
 
     Vec2 bulPos = m_player->getComponent<CTransform>().pos;
     float scale = -m_player->getComponent<CAnimation>().animation.getSprite().getScale().x;

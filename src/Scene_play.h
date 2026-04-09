@@ -16,6 +16,8 @@
 #define PLAYER_X_SPEED 4.0
 #define PLAYER_JUMP_SPEED 15.0
 
+#define BULLET_LIFESPAN 45
+
 class GameEngine;
 
 class Scene_Play : public Scene
@@ -53,6 +55,7 @@ protected:
     void sDebug();                        // System: debug system
     void sEnemySpawner();                 // System: enemy spawner system
     void sCollision();                    // System: Collision system
+    void sLifespan();                     // System: Lifespan system
 
     void solvePlayerTileCollision(std::shared_ptr<Entity> e);
     void solvePlayerWindowCollision();
