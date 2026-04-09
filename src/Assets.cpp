@@ -75,6 +75,7 @@ void Assets::loadFromFile(const std::string &path)
     addTexture(ASSET_GREENTUBE_TALL, "images/greenTubeTall.png");
     addTexture(ASSET_RUNNING, "images/running.png");
     addTexture(ASSET_JUMPING, "images/jumping.png");
+    addTexture(ASSET_BULLET, "images/bullet.png");
 
     sf::Sprite sprite(getTexture(ASSET_STANDING));
     sprite.setTextureRect(sf::IntRect({0, 0}, {24, 24}));
@@ -153,4 +154,17 @@ void Assets::loadFromFile(const std::string &path)
             0,
             Vec2(32.0, 64.0),
             ASSET_GREENTUBE_TALL));
+
+    sprite.setTexture(getTexture(ASSET_BULLET));
+    sprite.setTextureRect(sf::IntRect({0, 0}, {14, 8}));
+    sprite.setScale({2.0, 2.0});
+    addAnimation(
+        ASSET_BULLET,
+        Animation(
+            sprite,
+            1,
+            0,
+            0,
+            Vec2(14.0, 8.0),
+            ASSET_BULLET));
 }

@@ -11,6 +11,7 @@
 #define ACTION_DOWN "DOWN"
 #define ACTION_LEFT "LEFT"
 #define ACTION_RIGHT "RIGHT"
+#define ACTION_SHOOT "shoot"
 
 #define PLAYER_X_SPEED 4.0
 #define PLAYER_JUMP_SPEED 15.0
@@ -54,7 +55,11 @@ protected:
     void sCollision();                    // System: Collision system
 
     void solvePlayerTileCollision(std::shared_ptr<Entity> e);
-    void solvePlayerWallCollision();
+    void solvePlayerWindowCollision();
+    void solveBulletTileCollision(
+        std::shared_ptr<Entity> tile,
+        std::shared_ptr<Entity> bullet);
+    void solveBulletWindowCollision();
 
     void loadLevel(const std::string &filename); // load entities from level config file
 
@@ -63,6 +68,7 @@ protected:
     void drawTextures();       // Draw textures
 
     void spawnPlayer();
+    void spawnBullet();
 
 public:
     Scene_Play(const std::string levelPath, GameEngine *gameEngine = nullptr);

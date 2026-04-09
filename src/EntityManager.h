@@ -9,6 +9,7 @@
 
 #define PLAYER_TAG "player"
 #define TILE_TAG "tile"
+#define BULLET_TAG "bullet"
 
 typedef std::vector<std::shared_ptr<Entity>> EntityVector;
 typedef std::map<std::string, EntityVector> EntityMap;

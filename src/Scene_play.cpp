@@ -3,6 +3,11 @@
 #include "GameEngine.h"
 #include "Physics.h"
 
+float numSign(float num)
+{
+    return num == 0.0 ? 0.0 : num / std::abs(num);
+}
+
 Scene_Play::Scene_Play(const std::string levelPath, GameEngine *gameEngine)
     : Scene(gameEngine),
       m_levelPath{levelPath},
@@ -21,6 +26,7 @@ void Scene_Play::init(const std::string &levelPath)
     registerAction(sf::Keyboard::Scancode::S, ACTION_DOWN);
     registerAction(sf::Keyboard::Scancode::D, ACTION_RIGHT);
     registerAction(sf::Keyboard::Scancode::A, ACTION_LEFT);
+    registerAction(sf::Keyboard::Scancode::Space, ACTION_SHOOT);
 
     m_gridText.setFont(m_gameEngine->assets().getFont("Lato"));
     m_gridText.setCharacterSize(12);
@@ -132,6 +138,10 @@ void Scene_Play::sDoAction(const Action &action)
         if (action.name() == ACTION_RIGHT)
         {
             m_player->getComponent<CInput>().right = true;
+        }
+        if (action.name() == ACTION_SHOOT)
+        {
+            spawnBullet();
         }
     }
     else
@@ -258,6 +268,11 @@ void Scene_Play::sCollision()
     for (auto e : m_entities.getEntities(TILE_TAG))
     {
         solvePlayerTileCollision(e);
+
+        for (auto b : m_entities.getEntities(BULLET_TAG))
+        {
+            solveBulletTileCollision(e, b);
+        }
     }
 
     if (m_stillOnTheGround)
@@ -269,7 +284,10 @@ void Scene_Play::sCollision()
         m_player->getComponent<CState>().state = STATE_AIR;
     }
 
-    solvePlayerWallCollision();
+    solvePlayerWindowCollision();
+    solveBulletWindowCollision();
+
+    std::cout << m_entities.getEntities(BULLET_TAG).size() << std::endl;
 }
 
 void Scene_Play::sAnimation()
@@ -425,7 +443,7 @@ void Scene_Play::solvePlayerTileCollision(std::shared_ptr<Entity> e)
     }
 }
 
-void Scene_Play::solvePlayerWallCollision()
+void Scene_Play::solvePlayerWindowCollision()
 {
     float windowLeft = m_gameEngine->window().getView().getCenter().x -
                        m_gameEngine->window().getSize().x / 2;
@@ -438,6 +456,53 @@ void Scene_Play::solvePlayerWallCollision()
     }
 }
 
+void Scene_Play::solveBulletTileCollision(std::shared_ptr<Entity> tile,
+                                          std::shared_ptr<Entity> bullet)
+{
+    Vec2 overlap = Physics::getOverlap(tile, bullet);
+
+    if ((overlap.x > 0) && (overlap.y > 0))
+    {
+        if (bullet->getComponent<CTransform>().velocity.x > 0)
+        {
+            bullet->getComponent<CTransform>().pos.x =
+                tile->getComponent<CTransform>().pos.x - tile->getComponent<CBoundingBox>().halfSize.x -
+                bullet->getComponent<CBoundingBox>().halfSize.x;
+        }
+        else
+        {
+            bullet->getComponent<CTransform>().pos.x =
+                tile->getComponent<CTransform>().pos.x + tile->getComponent<CBoundingBox>().halfSize.x +
+                bullet->getComponent<CBoundingBox>().halfSize.x;
+        }
+
+        bullet->destroy();
+        if (tile->getComponent<CAnimation>().animation.getName() == ASSET_BRICK_TILE)
+        {
+            tile->destroy();
+        }
+    }
+}
+
+void Scene_Play::solveBulletWindowCollision()
+{
+    float windowLeft = m_gameEngine->window().getView().getCenter().x -
+                       m_gameEngine->window().getSize().x / 2;
+    float windowRight = m_gameEngine->window().getView().getCenter().x +
+                        m_gameEngine->window().getSize().x / 2;
+
+    for (auto b : m_entities.getEntities(BULLET_TAG))
+    {
+        if (((b->getComponent<CTransform>().pos.x -
+              b->getComponent<CBoundingBox>().halfSize.x) < windowLeft) ||
+            ((b->getComponent<CTransform>().pos.x +
+              b->getComponent<CBoundingBox>().halfSize.x) > windowRight))
+        {
+            b->destroy();
+        }
+    }
+}
+
 void Scene_Play::doAction(const Action &action)
 {
     sDoAction(action);
@@ -445,7 +510,7 @@ void Scene_Play::doAction(const Action &action)
 
 void Scene_Play::update()
 {
-    // If we exit the level, we destroy m_playerm so after entering the level
+    // If we exit the level, we destroy m_player so after entering the level
     // we need to load it again
     if (m_player == nullptr)
     {
@@ -546,6 +611,18 @@ void Scene_Play::drawGrid()
             m_gameEngine->window().draw(m_gridText);
         }
     }
+}
+
+void Scene_Play::spawnBullet()
+{
+    auto bullet = m_entities.addEntity(BULLET_TAG);
+    bullet->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BULLET), false);
+    bullet->addComponent<CBoundingBox>(m_gameEngine->assets().getAnimation(ASSET_BULLET).getSize());
+
+    Vec2 bulPos = m_player->getComponent<CTransform>().pos;
+    float scale = -m_player->getComponent<CAnimation>().animation.getSprite().getScale().x;
+
+    bullet->addComponent<CTransform>(bulPos, Vec2(1.0, 1.0), Vec2(numSign(scale) * 15.0, 0.0), 0.0);
 }
 
 void Scene_Play::spawnPlayer()
