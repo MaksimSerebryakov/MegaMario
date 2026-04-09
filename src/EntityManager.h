@@ -9,6 +9,7 @@
 
 #define PLAYER_TAG "player"
 #define TILE_TAG "tile"
+#define DECORATION_TAG "decoration"
 #define BULLET_TAG "bullet"
 
 typedef std::vector<std::shared_ptr<Entity>> EntityVector;

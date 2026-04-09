@@ -40,7 +40,26 @@ void Scene_Play::loadLevel(const std::string &filename)
     // TODO : remove, add from config!!
     m_playerConfig.MAXSPEED = 64;
 
-    spawnPlayer();
+    int gridsInWindow = m_gameEngine->window().getSize().x / (int)m_gridSize.x;
+
+    for (int i = 0; i < 7; i++)
+    {
+        auto e = m_entities.addEntity(DECORATION_TAG);
+
+        if (i & 1)
+        {
+            e->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_CLOUD_SKY_ODD), false);
+        }
+        else
+        {
+            e->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_CLOUD_SKY_EVEN), false);
+        }
+        e->addComponent<CTransform>(gridToMidPixel(i * gridsInWindow, 7, e));
+    }
+
+    auto bush = m_entities.addEntity(DECORATION_TAG);
+    bush->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BUSH), false);
+    bush->addComponent<CTransform>(gridToMidPixel(1, 1, bush));
 
     auto brick = m_entities.addEntity(TILE_TAG);
     brick->addComponent<CBoundingBox>(Vec2(64, 64));
@@ -95,6 +114,8 @@ void Scene_Play::loadLevel(const std::string &filename)
         e->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_GROUND_TILE), false);
         e->addComponent<CTransform>(gridToMidPixel(i, 0, e));
     }
+
+    spawnPlayer();
 }
 
 // ************************************
@@ -319,7 +340,7 @@ void Scene_Play::sAnimation()
             }
         }
 
-        // Set prev animation direction of X axis
+        // Set prev animation direction of X axis to save direction after changing player animation
         auto &sprite = playerAnimation.getSprite();
         sprite.setScale({scaleX, sprite.getScale().y});
     }

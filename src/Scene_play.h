@@ -33,7 +33,7 @@ protected:
     std::shared_ptr<Entity> m_player;
     PlayerConfig m_playerConfig;
     bool m_drawTextures = true;   // Show entities Textures
-    bool m_drawCollisions = true; // Debug: show collision bounding boxes
+    bool m_drawCollisions = false; // Debug: show collision bounding boxes
     bool m_drawGrid = false;      // Debug: show grid
     const Vec2 m_gridSize = {64, 64};
     // dummy font as sf::Text doesn't have default constructor

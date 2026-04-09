@@ -76,6 +76,9 @@ void Assets::loadFromFile(const std::string &path)
     addTexture(ASSET_RUNNING, "images/running.png");
     addTexture(ASSET_JUMPING, "images/jumping.png");
     addTexture(ASSET_BULLET, "images/bullet.png");
+    addTexture(ASSET_BUSH, "images/bush.png");
+    addTexture(ASSET_CLOUD_SKY_EVEN, "images/cloudSkyEven.png");
+    addTexture(ASSET_CLOUD_SKY_ODD, "images/cloudSkyOdd.png");
 
     sf::Sprite sprite(getTexture(ASSET_STANDING));
     sprite.setTextureRect(sf::IntRect({0, 0}, {24, 24}));
@@ -167,4 +170,43 @@ void Assets::loadFromFile(const std::string &path)
             0,
             Vec2(14.0, 8.0),
             ASSET_BULLET));
+
+    sprite.setTexture(getTexture(ASSET_BUSH));
+    sprite.setTextureRect(sf::IntRect({0, 0}, {48, 16}));
+    sprite.setScale({6.0, 6.0});
+    addAnimation(
+        ASSET_BUSH,
+        Animation(
+            sprite,
+            1,
+            0,
+            0,
+            Vec2(48.0, 16.0),
+            ASSET_BUSH));
+
+    sprite.setTexture(getTexture(ASSET_CLOUD_SKY_EVEN));
+    sprite.setTextureRect(sf::IntRect({0, 0}, {320, 176}));
+    sprite.setScale({3.0, 3.0});
+    addAnimation(
+        ASSET_CLOUD_SKY_EVEN,
+        Animation(
+            sprite,
+            1,
+            0,
+            0,
+            Vec2(320.0, 176.0),
+            ASSET_CLOUD_SKY_EVEN));
+
+    sprite.setTexture(getTexture(ASSET_CLOUD_SKY_ODD));
+    sprite.setTextureRect(sf::IntRect({0, 0}, {320, 176}));
+    sprite.setScale({3.0, 3.0});
+    addAnimation(
+        ASSET_CLOUD_SKY_ODD,
+        Animation(
+            sprite,
+            1,
+            0,
+            0,
+            Vec2(320.0, 176.0),
+            ASSET_CLOUD_SKY_ODD));
 }
