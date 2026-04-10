@@ -12,9 +12,11 @@
 #define ACTION_LEFT "LEFT"
 #define ACTION_RIGHT "RIGHT"
 #define ACTION_SHOOT "shoot"
+#define ACTION_PAUSE "pause"
 
 #define PLAYER_X_SPEED 4.0
-#define PLAYER_JUMP_SPEED 15.0
+#define PLAYER_JUMP_SPEED 18.0
+#define GRAVITY_CONST 0.7
 
 #define BULLET_LIFESPAN 45
 
@@ -32,9 +34,9 @@ protected:
     std::string m_levelPath;
     std::shared_ptr<Entity> m_player;
     PlayerConfig m_playerConfig;
-    bool m_drawTextures = true;   // Show entities Textures
+    bool m_drawTextures = true;    // Show entities Textures
     bool m_drawCollisions = false; // Debug: show collision bounding boxes
-    bool m_drawGrid = false;      // Debug: show grid
+    bool m_drawGrid = false;       // Debug: show grid
     const Vec2 m_gridSize = {64, 64};
     // dummy font as sf::Text doesn't have default constructor
     sf::Font m_font;
@@ -65,6 +67,7 @@ protected:
     void solveBulletWindowCollision();
 
     void loadLevel(const std::string &filename); // load entities from level config file
+    void returnToTheStart();                     // Return Player and window.view to the start of the level
 
     void drawGrid();           // Draw a grid inside level scene
     void drawCollisionBoxes(); // Draw entities Collision boxes

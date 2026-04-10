@@ -4,7 +4,7 @@
 
 int main()
 {
-    GameEngine game("bin/config.txt");
+    GameEngine game("assets.txt");
 
     game.run();
     

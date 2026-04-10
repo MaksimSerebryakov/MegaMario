@@ -27,6 +27,7 @@ void Scene_Play::init(const std::string &levelPath)
     registerAction(sf::Keyboard::Scancode::D, ACTION_RIGHT);
     registerAction(sf::Keyboard::Scancode::A, ACTION_LEFT);
     registerAction(sf::Keyboard::Scancode::Space, ACTION_SHOOT);
+    registerAction(sf::Keyboard::Scancode::P, ACTION_PAUSE);
 
     m_gridText.setFont(m_gameEngine->assets().getFont("Lato"));
     m_gridText.setCharacterSize(12);
@@ -106,16 +107,51 @@ void Scene_Play::loadLevel(const std::string &filename)
     tube->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_GREENTUBE_TALL), false);
     tube->addComponent<CTransform>(gridToMidPixel(8, 0, tube));
 
+    auto question = m_entities.addEntity(TILE_TAG);
+    question->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_QUESTION_ACTIVE), true);
+    question->addComponent<CBoundingBox>(
+        Vec2(m_gameEngine->assets().getAnimation(ASSET_QUESTION_ACTIVE).getSize().x,
+             m_gameEngine->assets().getAnimation(ASSET_QUESTION_ACTIVE).getSize().y));
+    question->addComponent<CTransform>(gridToMidPixel(8, 6, question));
+
+    question = m_entities.addEntity(TILE_TAG);
+    question->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_QUESTION_ACTIVE), true);
+    question->addComponent<CBoundingBox>(
+        Vec2(m_gameEngine->assets().getAnimation(ASSET_QUESTION_ACTIVE).getSize().x,
+             m_gameEngine->assets().getAnimation(ASSET_QUESTION_ACTIVE).getSize().y));
+    question->addComponent<CTransform>(gridToMidPixel(9, 6, question));
+
     for (int i = 0; i < 100; i++)
+    {
+        if ((i != 15) && (i != 25) && (i != 26))
+        {
+            auto e = m_entities.addEntity(TILE_TAG);
+
+            e->addComponent<CBoundingBox>(Vec2(64, 64));
+            e->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_GROUND_TILE), false);
+            e->addComponent<CTransform>(gridToMidPixel(i, 0, e));
+        }
+    }
+    for (int i = 11; i < 100; i++)
     {
         auto e = m_entities.addEntity(TILE_TAG);
 
         e->addComponent<CBoundingBox>(Vec2(64, 64));
-        e->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_GROUND_TILE), false);
-        e->addComponent<CTransform>(gridToMidPixel(i, 0, e));
+        e->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BRICK_TILE), false);
+        e->addComponent<CTransform>(gridToMidPixel(i, 3, e));
     }
 
     spawnPlayer();
+}
+
+void Scene_Play::returnToTheStart()
+{
+    m_player->getComponent<CTransform>().pos = gridToMidPixel(4, 6, m_player);
+
+    sf::View view = m_gameEngine->window().getView();
+    view.setCenter({m_gameEngine->window().getSize().x / (float)2.0,
+                    view.getCenter().y});
+    m_gameEngine->window().setView(view);
 }
 
 // ************************************
@@ -162,7 +198,11 @@ void Scene_Play::sDoAction(const Action &action)
         }
         if (action.name() == ACTION_SHOOT)
         {
-            spawnBullet();
+            m_player->getComponent<CInput>().shoot = true;
+        }
+        if (action.name() == ACTION_PAUSE)
+        {
+            m_paused = !m_paused;
         }
     }
     else
@@ -182,6 +222,10 @@ void Scene_Play::sDoAction(const Action &action)
         if (action.name() == ACTION_RIGHT)
         {
             m_player->getComponent<CInput>().right = false;
+        }
+        if (action.name() == ACTION_SHOOT)
+        {
+            m_player->getComponent<CInput>().shoot = false;
         }
     }
 }
@@ -209,6 +253,15 @@ void Scene_Play::sRender()
         drawGrid();
     }
 
+    sf::RectangleShape pauseRect({(float)m_gameEngine->window().getSize().x,
+                                  (float)m_gameEngine->window().getSize().y});
+    pauseRect.setFillColor(sf::Color(0, 0, 0, 78));
+    pauseRect.setPosition({viewCenterX - pauseRect.getSize().x / 2, 0.0});
+    if (m_paused)
+    {
+        m_gameEngine->window().draw(pauseRect);
+    }
+
     m_gameEngine->window().display();
 }
 
@@ -217,6 +270,12 @@ void Scene_Play::sMovement()
     Vec2 pVel(0, m_player->getComponent<CTransform>().velocity.y);
 
     // std::cout << m_player->getComponent<CState>().state << std::endl;
+
+    if (m_player->getComponent<CInput>().shoot)
+    {
+        spawnBullet();
+        m_player->getComponent<CInput>().shoot = false;
+    }
 
     if (m_player->getComponent<CInput>().left && (!m_onTheRightWall))
     {
@@ -288,11 +347,13 @@ void Scene_Play::sCollision()
 
     for (auto e : m_entities.getEntities(TILE_TAG))
     {
-        solvePlayerTileCollision(e);
-
-        for (auto b : m_entities.getEntities(BULLET_TAG))
+        if (e->hasComponent<CBoundingBox>())
         {
-            solveBulletTileCollision(e, b);
+            solvePlayerTileCollision(e);
+            for (auto b : m_entities.getEntities(BULLET_TAG))
+            {
+                solveBulletTileCollision(e, b);
+            }
         }
     }
 
@@ -361,6 +422,11 @@ void Scene_Play::sAnimation()
             {
                 sprite.setScale({sprite.getScale().x * -1, sprite.getScale().y});
             }
+
+            if (!e->getComponent<CAnimation>().repeat && e->getComponent<CAnimation>().animation.hasEnded())
+            {
+                e->destroy();
+            }
         }
     }
 }
@@ -413,6 +479,13 @@ void Scene_Play::solvePlayerTileCollision(std::shared_ptr<Entity> e)
                     e->getComponent<CTransform>().pos.y +
                     e->getComponent<CBoundingBox>().halfSize.y +
                     m_player->getComponent<CBoundingBox>().halfSize.y;
+
+                // after brick is hit by a player from below, change animation to BOOM
+                if (e->getComponent<CAnimation>().animation.getName() == ASSET_BRICK_TILE)
+                {
+                    e->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BOOM), false);
+                    e->removeComponent<CBoundingBox>();
+                }
             }
         }
 
@@ -473,6 +546,16 @@ void Scene_Play::solvePlayerWindowCollision()
 {
     float windowLeft = m_gameEngine->window().getView().getCenter().x -
                        m_gameEngine->window().getSize().x / 2;
+    float windowBottom = m_gameEngine->window().getView().getCenter().y +
+                         m_gameEngine->window().getSize().y / 2;
+
+    if (m_player->getComponent<CTransform>().pos.y +
+            m_player->getComponent<CBoundingBox>().halfSize.y >
+        windowBottom)
+    {
+        returnToTheStart();
+        return;
+    }
 
     if ((m_player->getComponent<CTransform>().pos.x -
          m_player->getComponent<CBoundingBox>().halfSize.x) < windowLeft)
@@ -505,7 +588,12 @@ void Scene_Play::solveBulletTileCollision(std::shared_ptr<Entity> tile,
         bullet->destroy();
         if (tile->getComponent<CAnimation>().animation.getName() == ASSET_BRICK_TILE)
         {
-            tile->destroy();
+            // after bullet hit a brick change animation to BOOM
+            if (tile->getComponent<CAnimation>().animation.getName() == ASSET_BRICK_TILE)
+            {
+                tile->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BOOM), false);
+                tile->removeComponent<CBoundingBox>();
+            }
         }
     }
 }
@@ -547,10 +635,16 @@ void Scene_Play::update()
 
     m_entities.update();
 
-    sMovement();
-    sCollision();
-    sLifespan();
-    sAnimation();
+    // std::cout << m_entities.getEntities(PLAYER_TAG).size() << std::endl;
+
+    if (!m_paused)
+    {
+        sMovement();
+        sCollision();
+        sLifespan();
+        sAnimation();
+    }
+
     sRender();
 
     m_currentFrame++;
@@ -663,7 +757,7 @@ void Scene_Play::spawnPlayer()
     player->addComponent<CBoundingBox>(Vec2(48, 48));
     player->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_JUMPING), true);
     player->addComponent<CTransform>(gridToMidPixel(4, 6, player));
-    player->addComponent<CGravity>(0.5);
+    player->addComponent<CGravity>(GRAVITY_CONST);
 
     m_player = player;
 }
@@ -671,6 +765,7 @@ void Scene_Play::spawnPlayer()
 void Scene_Play::onEnd()
 {
     m_gameEngine->changeScene(SCENE_MENU, std::make_shared<Scene_Menu>(m_gameEngine));
+
     m_player = nullptr;
 }
 

@@ -6,6 +6,7 @@
 
 #include "Animation.h"
 
+// here are assets' names
 #define ASSET_STANDING "stand"
 #define ASSET_GROUND_TILE "ground"
 #define ASSET_BRICK_TILE "brick"
@@ -16,6 +17,8 @@
 #define ASSET_BUSH "bush"
 #define ASSET_CLOUD_SKY_EVEN "cloudSkyEven"
 #define ASSET_CLOUD_SKY_ODD "cloudSkyOdd"
+#define ASSET_BOOM "boom"
+#define ASSET_QUESTION_ACTIVE "questionActive"
 
 typedef std::map<std::string, sf::Texture> TextureMap;
 typedef std::map<std::string, Animation> AnimationMap;

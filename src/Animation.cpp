@@ -21,7 +21,6 @@ Animation::Animation(
 {
     m_sprite = sprite;
 
-    
     m_sprite.setOrigin({size.x / 2, size.y / 2});
 }
 
@@ -31,10 +30,13 @@ void Animation::update()
     {
         return;
     }
-    int textureOffsetX = ((m_currentFrame % m_frameCount) / m_speed) * (int)m_size.x;
+    int textureOffsetX = (((m_currentFrame % m_frameCount) / m_speed) * (int)m_size.x) %
+                         m_sprite.getTexture().getSize().x;
+    int textureOffsetY = ((m_currentFrame / (m_speed * (m_sprite.getTexture().getSize().x / (int)m_size.x))) %
+                         (m_sprite.getTexture().getSize().y / (int)m_size.y)) * m_size.y;
 
     m_sprite.setTextureRect(sf::IntRect(
-        {textureOffsetX, 0},
+        {textureOffsetX, textureOffsetY},
         {(int)m_size.x, (int)m_size.y}));
 
     m_currentFrame++;
