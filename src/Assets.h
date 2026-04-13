@@ -19,6 +19,8 @@
 #define ASSET_CLOUD_SKY_ODD "cloudSkyOdd"
 #define ASSET_BOOM "boom"
 #define ASSET_QUESTION_ACTIVE "questionActive"
+#define ASSET_QUESTION_INACTIVE "questionInactive"
+#define ASSET_COIN "coin"
 
 typedef std::map<std::string, sf::Texture> TextureMap;
 typedef std::map<std::string, Animation> AnimationMap;

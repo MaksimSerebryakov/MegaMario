@@ -486,6 +486,17 @@ void Scene_Play::solvePlayerTileCollision(std::shared_ptr<Entity> e)
                     e->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BOOM), false);
                     e->removeComponent<CBoundingBox>();
                 }
+                // after a question tile is hit by a player from below, set animation to inactive and spawn a coin
+                if (e->getComponent<CAnimation>().animation.getName() == ASSET_QUESTION_ACTIVE)
+                {
+                    e->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_QUESTION_INACTIVE), true);
+                    auto coin = m_entities.addEntity(DECORATION_TAG);
+                    coin->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_COIN), false);
+                    coin->addComponent<CTransform>(
+                        Vec2(e->getComponent<CTransform>().pos.x,
+                             e->getComponent<CTransform>().pos.y - e->getComponent<CBoundingBox>().size.y));
+                    coin->addComponent<CLifeSpan>(30);
+                }
             }
         }
 
@@ -586,14 +597,22 @@ void Scene_Play::solveBulletTileCollision(std::shared_ptr<Entity> tile,
         }
 
         bullet->destroy();
+        // after bullet hit a brick change animation to BOOM
         if (tile->getComponent<CAnimation>().animation.getName() == ASSET_BRICK_TILE)
         {
-            // after bullet hit a brick change animation to BOOM
-            if (tile->getComponent<CAnimation>().animation.getName() == ASSET_BRICK_TILE)
-            {
-                tile->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BOOM), false);
-                tile->removeComponent<CBoundingBox>();
-            }
+            tile->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BOOM), false);
+            tile->removeComponent<CBoundingBox>();
+        }
+        // after bullet hit a question tile, set animation to inactive and spawn a coin
+        if (tile->getComponent<CAnimation>().animation.getName() == ASSET_QUESTION_ACTIVE)
+        {
+            tile->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_QUESTION_INACTIVE), true);
+            auto coin = m_entities.addEntity(DECORATION_TAG);
+            coin->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_COIN), false);
+            coin->addComponent<CTransform>(
+                Vec2(tile->getComponent<CTransform>().pos.x,
+                     tile->getComponent<CTransform>().pos.y - tile->getComponent<CBoundingBox>().size.y));
+            coin->addComponent<CLifeSpan>(30);
         }
     }
 }
@@ -635,7 +654,7 @@ void Scene_Play::update()
 
     m_entities.update();
 
-    // std::cout << m_entities.getEntities(PLAYER_TAG).size() << std::endl;
+    // std::cout << m_entities.getEntities(DECORATION_TAG).size() << std::endl;
 
     if (!m_paused)
     {
