@@ -61,7 +61,7 @@ void Scene_Menu::sDoAction(const Action &action)
         if (action.name() == "PLAY")
         {
             m_gameEngine->changeScene(SCENE_PLAY,
-                                      std::make_shared<Scene_Play>("text.txt", m_gameEngine));
+                                      std::make_shared<Scene_Play>("level1.txt", m_gameEngine));
         }
     }
 }

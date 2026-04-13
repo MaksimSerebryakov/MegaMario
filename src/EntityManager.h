@@ -11,6 +11,7 @@
 #define TILE_TAG "tile"
 #define DECORATION_TAG "decoration"
 #define BULLET_TAG "bullet"
+#define SECRET_TILE_TAG "secretTile"
 
 typedef std::vector<std::shared_ptr<Entity>> EntityVector;
 typedef std::map<std::string, EntityVector> EntityMap;

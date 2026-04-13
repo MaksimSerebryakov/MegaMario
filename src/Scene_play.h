@@ -72,6 +72,7 @@ protected:
     void drawGrid();           // Draw a grid inside level scene
     void drawCollisionBoxes(); // Draw entities Collision boxes
     void drawTextures();       // Draw textures
+    void drawRoomBackground(); // Draw a background in the room with torch
 
     void spawnPlayer();
     void spawnBullet();

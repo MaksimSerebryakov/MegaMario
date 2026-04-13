@@ -21,6 +21,11 @@
 #define ASSET_QUESTION_ACTIVE "questionActive"
 #define ASSET_QUESTION_INACTIVE "questionInactive"
 #define ASSET_COIN "coin"
+#define ASSET_STONE "stone"
+#define ASSET_POLE_TOP "poleTop"
+#define ASSET_POLE "pole"
+#define ASSET_SECRET_BRICK "secretBrick"
+#define ASSET_SECRET_BRICK_HIDDEN "secretBrickHidden"
 
 typedef std::map<std::string, sf::Texture> TextureMap;
 typedef std::map<std::string, Animation> AnimationMap;

@@ -1,3 +1,6 @@
+#include <iostream>
+#include <fstream>
+
 #include "Scene_play.h"
 #include "Scene_Menu.h"
 #include "GameEngine.h"
@@ -37,108 +40,58 @@ void Scene_Play::init(const std::string &levelPath)
 
 void Scene_Play::loadLevel(const std::string &filename)
 {
+    std::fstream fs(filename);
+
     m_entities = EntityManager();
     // TODO : remove, add from config!!
     m_playerConfig.MAXSPEED = 64;
 
     int gridsInWindow = m_gameEngine->window().getSize().x / (int)m_gridSize.x;
 
-    for (int i = 0; i < 7; i++)
+    std::string animName, assetName;
+    int gridX, gridY;
+
+    while (fs >> animName)
     {
-        auto e = m_entities.addEntity(DECORATION_TAG);
-
-        if (i & 1)
+        if (animName == "Tile")
         {
-            e->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_CLOUD_SKY_ODD), false);
+            fs >> assetName >> gridX >> gridY;
+            std::shared_ptr<Entity> tile;
+
+            if (assetName == ASSET_SECRET_BRICK_HIDDEN)
+            {
+                tile = m_entities.addEntity(SECRET_TILE_TAG);
+            }
+            else
+            {
+                tile = m_entities.addEntity(TILE_TAG);
+            }
+
+            tile->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(assetName), true);
+            tile->addComponent<CTransform>(gridToMidPixel(gridX, gridY, tile));
+            tile->addComponent<CBoundingBox>(
+                tile->getComponent<CAnimation>().animation.getSize());
+
+            continue;
         }
-        else
+        if (animName == "Dec")
         {
-            e->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_CLOUD_SKY_EVEN), false);
+            fs >> assetName >> gridX >> gridY;
+
+            auto dec = m_entities.addEntity(DECORATION_TAG);
+            dec->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(assetName), true);
+            dec->addComponent<CTransform>(gridToMidPixel(gridX, gridY, dec));
+            if (assetName == "torch")
+            {
+                dec->getComponent<CTransform>().pos = Vec2(4329, 469);
+            }
+            if (assetName == "flag")
+            {
+                dec->getComponent<CTransform>().pos = Vec2(5508, 288);
+            }
+
+            continue;
         }
-        e->addComponent<CTransform>(gridToMidPixel(i * gridsInWindow, 7, e));
-    }
-
-    auto bush = m_entities.addEntity(DECORATION_TAG);
-    bush->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BUSH), false);
-    bush->addComponent<CTransform>(gridToMidPixel(1, 1, bush));
-
-    auto brick = m_entities.addEntity(TILE_TAG);
-    brick->addComponent<CBoundingBox>(Vec2(64, 64));
-    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BRICK_TILE), false);
-    brick->addComponent<CTransform>(gridToMidPixel(6, 6, brick));
-
-    brick = m_entities.addEntity(TILE_TAG);
-    brick->addComponent<CBoundingBox>(Vec2(64, 64));
-    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BRICK_TILE), false);
-    brick->addComponent<CTransform>(gridToMidPixel(1, 1, brick));
-
-    brick = m_entities.addEntity(TILE_TAG);
-    brick->addComponent<CBoundingBox>(Vec2(64, 64));
-    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BRICK_TILE), false);
-    brick->addComponent<CTransform>(gridToMidPixel(4, 2, brick));
-
-    brick = m_entities.addEntity(TILE_TAG);
-    brick->addComponent<CBoundingBox>(Vec2(64, 64));
-    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BRICK_TILE), false);
-    brick->addComponent<CTransform>(gridToMidPixel(4, 3, brick));
-
-    brick = m_entities.addEntity(TILE_TAG);
-    brick->addComponent<CBoundingBox>(Vec2(64, 64));
-    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BRICK_TILE), false);
-    brick->addComponent<CTransform>(gridToMidPixel(7, 2, brick));
-
-    brick = m_entities.addEntity(TILE_TAG);
-    brick->addComponent<CBoundingBox>(Vec2(64, 64));
-    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BRICK_TILE), false);
-    brick->addComponent<CTransform>(gridToMidPixel(7, 3, brick));
-
-    // brick = m_entities.addEntity(TILE_TAG);
-    // brick->addComponent<CBoundingBox>(Vec2(64, 64));
-    // brick->addComponent<CTransform>(gridToMidPixel(3, 4, brick));
-    // brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation("brick"), false);
-
-    brick = m_entities.addEntity(TILE_TAG);
-    brick->addComponent<CBoundingBox>(Vec2(64, 64));
-    brick->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BRICK_TILE), false);
-    brick->addComponent<CTransform>(gridToMidPixel(5, 6, brick));
-
-    auto tube = m_entities.addEntity(TILE_TAG);
-    tube->addComponent<CBoundingBox>(Vec2(128, 256));
-    tube->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_GREENTUBE_TALL), false);
-    tube->addComponent<CTransform>(gridToMidPixel(8, 0, tube));
-
-    auto question = m_entities.addEntity(TILE_TAG);
-    question->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_QUESTION_ACTIVE), true);
-    question->addComponent<CBoundingBox>(
-        Vec2(m_gameEngine->assets().getAnimation(ASSET_QUESTION_ACTIVE).getSize().x,
-             m_gameEngine->assets().getAnimation(ASSET_QUESTION_ACTIVE).getSize().y));
-    question->addComponent<CTransform>(gridToMidPixel(8, 6, question));
-
-    question = m_entities.addEntity(TILE_TAG);
-    question->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_QUESTION_ACTIVE), true);
-    question->addComponent<CBoundingBox>(
-        Vec2(m_gameEngine->assets().getAnimation(ASSET_QUESTION_ACTIVE).getSize().x,
-             m_gameEngine->assets().getAnimation(ASSET_QUESTION_ACTIVE).getSize().y));
-    question->addComponent<CTransform>(gridToMidPixel(9, 6, question));
-
-    for (int i = 0; i < 100; i++)
-    {
-        if ((i != 15) && (i != 25) && (i != 26))
-        {
-            auto e = m_entities.addEntity(TILE_TAG);
-
-            e->addComponent<CBoundingBox>(Vec2(64, 64));
-            e->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_GROUND_TILE), false);
-            e->addComponent<CTransform>(gridToMidPixel(i, 0, e));
-        }
-    }
-    for (int i = 11; i < 100; i++)
-    {
-        auto e = m_entities.addEntity(TILE_TAG);
-
-        e->addComponent<CBoundingBox>(Vec2(64, 64));
-        e->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BRICK_TILE), false);
-        e->addComponent<CTransform>(gridToMidPixel(i, 3, e));
     }
 
     spawnPlayer();
@@ -239,6 +192,8 @@ void Scene_Play::sRender()
     view.setCenter({viewCenterX, view.getCenter().y});
     m_gameEngine->window().setView(view);
 
+    drawRoomBackground();
+
     if (m_drawTextures)
     {
         drawTextures();
@@ -316,6 +271,17 @@ void Scene_Play::sMovement()
     // }
     m_player->getComponent<CTransform>().velocity = pVel;
 
+    auto hiddenTile = m_entities.getEntities(SECRET_TILE_TAG)[0];
+
+    if (hiddenTile->getComponent<CTransform>().velocity.x != 0)
+    {
+        if (hiddenTile->getComponent<CTransform>().pos ==
+            gridToMidPixel(58, 3, hiddenTile))
+        {
+            hiddenTile->getComponent<CTransform>().velocity.x = 0;
+        }
+    }
+
     for (auto e : m_entities.getEntities())
     {
         if (e->hasComponent<CGravity>())
@@ -356,6 +322,7 @@ void Scene_Play::sCollision()
             }
         }
     }
+    solvePlayerTileCollision(m_entities.getEntities(SECRET_TILE_TAG)[0]);
 
     if (m_stillOnTheGround)
     {
@@ -481,7 +448,8 @@ void Scene_Play::solvePlayerTileCollision(std::shared_ptr<Entity> e)
                     m_player->getComponent<CBoundingBox>().halfSize.y;
 
                 // after brick is hit by a player from below, change animation to BOOM
-                if (e->getComponent<CAnimation>().animation.getName() == ASSET_BRICK_TILE)
+                if (e->getComponent<CAnimation>().animation.getName() == ASSET_BRICK_TILE ||
+                    e->getComponent<CAnimation>().animation.getName() == ASSET_SECRET_BRICK_HIDDEN)
                 {
                     e->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BOOM), false);
                     e->removeComponent<CBoundingBox>();
@@ -496,6 +464,11 @@ void Scene_Play::solvePlayerTileCollision(std::shared_ptr<Entity> e)
                         Vec2(e->getComponent<CTransform>().pos.x,
                              e->getComponent<CTransform>().pos.y - e->getComponent<CBoundingBox>().size.y));
                     coin->addComponent<CLifeSpan>(30);
+                }
+                if (e->getComponent<CAnimation>().animation.getName() == ASSET_SECRET_BRICK)
+                {
+                    e->addComponent<CAnimation>(m_gameEngine->assets().getAnimation(ASSET_BRICK_TILE), false);
+                    m_entities.getEntities(SECRET_TILE_TAG)[0]->getComponent<CTransform>().velocity.x = -0.5;
                 }
             }
         }
@@ -541,6 +514,13 @@ void Scene_Play::solvePlayerTileCollision(std::shared_ptr<Entity> e)
     {
         if (prevOverlap.x >= 0)
         {
+            // if we touch the pole, return to the start of the level
+            if (e->getComponent<CAnimation>().animation.getName().find(ASSET_POLE) !=
+                e->getComponent<CAnimation>().animation.getName().npos)
+            {
+                returnToTheStart();
+            }
+
             if (m_player->getComponent<CTransform>().pos.x < e->getComponent<CTransform>().pos.x)
             {
                 m_onTheLeftWall = true;
@@ -674,9 +654,6 @@ Vec2 Scene_Play::gridToMidPixel(float gridX, float gridY, std::shared_ptr<Entity
     float x = entity->getComponent<CAnimation>().animation.getSize().x;
     float y = entity->getComponent<CAnimation>().animation.getSize().y;
 
-    // x = entity->getComponent<CBoundingBox>().size.x;
-    // y = entity->getComponent<CBoundingBox>().size.y;
-
     x = gridX * m_gridSize.x + x / 2;
     y = height() - gridY * m_gridSize.y - y / 2;
 
@@ -722,13 +699,6 @@ void Scene_Play::drawCollisionBoxes()
 
 void Scene_Play::drawGrid()
 {
-    // sf::View view = m_gameEngine->window().getView();
-
-    // view.setCenter({m_gameEngine->window().getView().getCenter().x + (float)0.2,
-    //                 m_gameEngine->window().getView().getCenter().y});
-
-    // m_gameEngine->window().setView(view);
-
     float leftX = m_gameEngine->window().getView().getCenter().x - width() / 2;
     float rightX = leftX + width() + m_gridSize.x;
     float nextGridX = leftX - ((int)leftX % (int)m_gridSize.x);
@@ -753,6 +723,33 @@ void Scene_Play::drawGrid()
             m_gameEngine->window().draw(m_gridText);
         }
     }
+}
+
+void Scene_Play::drawRoomBackground()
+{
+    auto &window = m_gameEngine->window();
+
+    sf::VertexArray triangle1(sf::PrimitiveType::Triangles, 3);
+
+    triangle1[0].position = sf::Vector2f(3840.f, window.getSize().y - 320.f);
+    triangle1[1].position = sf::Vector2f(4352.f, window.getSize().y - 320.f);
+    triangle1[2].position = sf::Vector2f(3840.f, window.getSize().y - 64.f);
+
+    triangle1[0].color = sf::Color::Black;
+    triangle1[1].color = sf::Color(239, 194, 66);
+    triangle1[2].color = sf::Color::Black;
+
+    window.draw(triangle1);
+
+    triangle1[0].position = sf::Vector2f(4352.f, window.getSize().y - 64.f);
+    triangle1[1].position = sf::Vector2f(4352.f, window.getSize().y - 320.f);
+    triangle1[2].position = sf::Vector2f(3840.f, window.getSize().y - 64.f);
+
+    triangle1[0].color = sf::Color::Black;
+    triangle1[1].color = sf::Color(239, 194, 66);
+    triangle1[2].color = sf::Color::Black;
+
+    window.draw(triangle1);
 }
 
 void Scene_Play::spawnBullet()
