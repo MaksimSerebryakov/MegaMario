@@ -1,0 +1,45 @@
+Texture TexStand images/stand.png
+Texture TexGround images/ground.png
+Texture TexBrick images/brick.png
+Texture TexGreenTubeTall images/greenTubeTall.png
+Texture TexRunning images/running.png
+Texture TexJumping images/jumping.png
+Texture TexBullet images/bullet.png
+Texture TexBush images/bush.png
+Texture TexCloudSkyEven images/cloudSkyEven.png
+Texture TexCloudSkyOdd images/cloudSkyOdd.png
+Texture TexBoom images/boom.png
+Texture TexQuestionActive images/questionActive.png
+Texture TexCoin images/coin.png
+Texture TexQuestionInactive images/questionInactive.png
+Texture TexStone images/stone.png
+Texture TexDoor images/door.png
+Texture TexTorch images/torch.png
+Texture TexPole images/pole.png
+Texture TexPoleTop images/poleTop.png
+Texture TexFlag images/flag.png
+Texture TexSecretBrick images/secretBrick.png
+Animation stand TexStand 180 170 24.0 24.0 -2.0 2.0
+Animation jumping TexJumping 1 0 24.0 29.0 -2.0 2.0
+Animation running TexRunning 40 10 25.0 24.0 -2.0 2.0
+Animation ground TexGround 1 0 16.0 16.0 4.0 4.0
+Animation brick TexBrick 1 0 16.0 16.0 4.0 4.0
+Animation greenTubeTall TexGreenTubeTall 1 0 32.0 64.0 4.0 4.0
+Animation bullet TexBullet 1 0 14.0 8.0 2.0 2.0
+Animation bush TexBush 1 0 48.0 16.0 6.0 6.0
+Animation cloudSkyEven TexCloudSkyEven 1 0 320.0 176.0 3.0 3.0
+Animation cloudSkyOdd TexCloudSkyOdd 1 0 320.0 176.0 3.0 3.0
+Animation boom TexBoom 36 3 192.0 192.0 0.33333333333 0.33333333333
+Animation questionActive TexQuestionActive 40 20 16.0 16.0 4.0 4.0
+Animation questionInactive TexQuestionInactive 1 0 16.0 16.0 4.0 4.0
+Animation coin TexCoin 30 6 64.0 64.0 1.0 1.0
+Animation stone TexStone 1 0 64.0 64.0 1.0 1.0 
+Animation door TexDoor 1 0 16.0 32.0 4.0 4.0
+Animation torch TexTorch 28 4 11.0 23.0 2.0 2.0
+Animation pole TexPole 1 0 64.0 64.0 1.0 1.0
+Animation poleTop TexPoleTop 1 0 64.0 64.0 1.0 1.0
+Animation flag TexFlag 1 0 16.0 16.0 4.0 4.0
+Animation secretBrick TexSecretBrick 120 30 16.0 16.0 4.0 4.0
+Animation secretBrickHidden TexBrick 1 0 16.0 16.0 4.0 4.0
+Font Lato fonts/Lato.ttf
+Font 8bit fonts/8bit.ttf
